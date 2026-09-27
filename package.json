@@ -1,0 +1,17 @@
+{
+  "name": "patchouli-lecture-2",
+  "private": true,
+  "version": "0.1.0",
+  "description": "帕秋莉讲座 第 2 集：从 9 分到 90 分，笨蛋都能懂的学习公式（Canvas 2D 科普动画）",
+  "scripts": {
+    "font": "node tools/fetch-font.mjs",
+    "frames": "node tools/frames.mjs",
+    "build": "node tools/build.mjs",
+    "render": "node tools/render.mjs"
+  },
+  "devDependencies": {
+    "aquestalk.js": "^1.0.7",
+    "pinyin-pro": "^3.29.4",
+    "playwright": "1.56.1"
+  }
+}

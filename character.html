@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>剪纸帕秋莉 / 琪露诺 样张</title>
+<style>
+@font-face { font-family: WenKai; src: url(fonts/LXGWWenKai-Regular.ttf); font-display: block; }
+html, body { margin: 0; background: #d9d0bf; color: #221c26; font: 15px/1.4 WenKai, KaiTi, serif; }
+canvas { display: block; margin: 0 auto 16px; max-width: 100%; }
+#nav { padding: 8px 16px; } #nav a { color: #6d5d8c; margin-right: 12px; }
+</style>
+</head>
+<body>
+<!-- 开发用样张页：?sheet=poses|moods|stage（默认全部），?t=秒 固定时间（不传则动画播放），?dots 画出返回的锚点，?mood= ?mouth= 调试
+     ?who=cirno 换成琪露诺：sheet=poses|moods|pair|zoom（pair 是和帕秋莉并排的构图） -->
+<div id="nav">帕秋莉：<a href="?sheet=poses">全部姿势</a><a href="?sheet=moods">表情</a><a href="?sheet=stage">构图</a><a href="?">全部</a> · <a href="?sheet=poses&dots">锚点</a>
+<br>琪露诺：<a href="?who=cirno&sheet=poses">全部姿势</a><a href="?who=cirno&sheet=moods">表情</a><a href="?who=cirno&sheet=pair">和帕秋莉并排</a><a href="?who=cirno">全部</a> · <a href="?who=cirno&sheet=poses&dots">锚点</a></div>
+<div id="wrap"></div>
+<script src="src/core.js"></script>
+<script src="src/kit.js"></script>
+<script src="src/character/patchouli.js"></script>
+<script src="src/character/cirno.js"></script>
+<script>
+// core.js 的 Q 是 URL 参数
+const chDots = Q.has('dots');
+function chPaper(c, w, h) { c.fillStyle = P.paper; c.fillRect(0, 0, w, h); grain(c, polyPath(rectPts(0, 0, w, h)), .12); }
+function chMarks(c, r) {
+  if (!chDots || !r) return;
+  const dot = (p, col) => { if (!p) return; c.fillStyle = col; c.beginPath(); c.arc(p[0], p[1], 5, 0, TAU); c.fill(); };
+  dot(r.head, P.red); r.hands.forEach(p => dot(p, P.green)); dot(r.book, P.blue); dot(r.hold, P.blue); dot(r.tip, P.gold);
+}
+const CH_SHEETS = {
+  // 全部 pose 一排（同一比例 h=440）
+  poses: { w: 2760, h: 720, draw(c, t) {
+    chPaper(c, 2760, 720);
+    const list = [['stand', 'normal'], ['lecture', 'normal'], ['point', 'smug'], ['hide', 'flustered'], ['cross', 'pout'], ['sit', 'smile'], ['peek', 'normal'], ['tired', 'sleepy'], ['lift', 'annoyed'], ['lie', 'sleepy']];
+    const base = 600, hh = 440;
+    list.forEach(([p, m], i) => {
+      const x = 150 + i * 250 + (p === 'lie' ? 170 : 0);
+      rline(c, [[x - 115 - (p === 'lie' ? 150 : 0), base], [x + 115 + (p === 'lie' ? 150 : 0), base]], { w: 3, color: P.ink2, seed: i + 3 });
+      const o = { x, y: base, h: hh, pose: p, mood: m, t: t + i * .37, blink: p === 'lie' ? 1 : blinkAt(t, i + 1), mouth: p === 'lecture' ? mouthAt(t % 3, { t0: 0, t1: 3, text: '今天讲调理身体' }) : 0 };
+      if (p === 'sit') o.y = base - 100;
+      if (p === 'sit') rline(c, [[x - 110, base - 100], [x + 110, base - 100]], { w: 3, color: P.ink2, seed: 40 });
+      if (p === 'peek') { o.y = base - 160; rline(c, [[x - 110, base - 160], [x + 110, base - 160]], { w: 3, color: P.ink2, seed: 41 }); }
+      const r = drawPatchouli(c, o); chMarks(c, r);
+      zh(c, p + ' · ' + m, x, base + 60, { size: 28, align: 'center', color: P.ink2 });
+    });
+  } },
+  // 头部放大（约 500px 高）的全部表情
+  moods: { w: 2280, h: 1260, draw(c, t) {
+    chPaper(c, 2280, 1260);
+    const moods = ['normal', 'smug', 'pout', 'flustered', 'annoyed', 'sleepy', 'surprised', 'smile'], mo = +(Q.get('mouth') || 0);
+    moods.forEach((m, i) => { const cx = 285 + (i % 4) * 570, top = 20 + Math.floor(i / 4) * 620, hh = 1210;
+      c.save(); c.beginPath(); c.rect(cx - 285, top, 570, 560); c.clip();
+      drawPatchouli(c, { x: cx, y: top + 36 + 1181, h: hh, pose: 'stand', mood: m, t, mouth: mo, blink: Q.has('t') ? 0 : blinkAt(t, i + 2) });
+      c.restore();
+      zh(c, m, cx, top + 598, { size: 30, align: 'center', color: P.ink2 }); });
+  } },
+  // 开发用：几个姿势放大看（?poses=a,b,c&moods=x,y,z）
+  zoom: { w: 1800, h: 1000, draw(c, t) {
+    chPaper(c, 1800, 1000);
+    const ps = (Q.get('poses') || 'stand,lecture,cross,hide').split(','), ms = (Q.get('moods') || '').split(',');
+    ps.forEach((p, i) => { const x = 1800 / ps.length * (i + .5), y = p === 'peek' ? 700 : p === 'sit' ? 780 : 960;
+      rline(c, [[x - 200, y], [x + 200, y]], { w: 3, color: P.ink2, seed: i + 3 });
+      const r = drawPatchouli(c, { x: p === 'lie' ? x - 60 : x, y, h: +(Q.get('h') || 880), pose: p, mood: ms[i] || 'normal', t, facing: +(Q.get('facing') || 1), blink: p === 'lie' ? 1 : 0, mouth: +(Q.get('mouth') || 0) }); chMarks(c, r); });
+  } },
+  // 示例构图：书页上她站在页边，另一边一条墨线曲线
+  stage: { w: 1920, h: 1080, draw(c, t) {
+    paperBg(c);
+    rline(c, [[110, 900], [1810, 900]], { w: 4, color: P.ink, seed: 5 });
+    const pts = []; for (let k = 0; k <= 60; k++) { const u = k / 60; pts.push([760 + u * 980, 700 - 330 * Math.sin(u * Math.PI * 1.5) * Math.exp(-u * .9) - 40 * u]); }
+    rline(c, pts, { w: 5, color: P.ink, seed: 9, smooth: true });
+    zh(c, '23 点', 1280, 250, { size: 64, color: P.ink });
+    const mood = Q.get('mood') || 'normal', pose = Q.get('pose') || 'lecture';
+    const cur = { t0: 0, t1: 3, text: '熬夜的代价，是第二天的你。' };
+    const r = drawPatchouli(c, { x: 400, y: 900, h: 520, pose, mood, t, gesture: .55 + .45 * Math.sin(t * 1.4) ** 2, mouth: mouthAt(t % 3.5, cur), blink: blinkAt(t) });
+    chMarks(c, r);
+    caption(c, '第一页 · 睡眠', 10, 0);
+    zh(c, '熬夜的代价，是第二天的你。', 960, 1000, { size: 42, align: 'center', color: P.ink });
+    handFrame(c, 0);
+  } },
+};
+// 琪露诺（?who=cirno）
+const CH_CIR = {
+  // 全部 pose 一排（h=440），每个配一个常用表情
+  poses: { w: 2400, h: 760, draw(c, t) {
+    chPaper(c, 2400, 760);
+    const list = [['stand', 'normal'], ['proud', 'proud'], ['point', 'normal'], ['hold', 'happy'], ['think', 'confused'], ['slump', 'cry'], ['fly', 'happy'], ['throw', 'pout']];
+    const base = 660, hh = 440;
+    list.forEach(([p, m], i) => {
+      const x = 170 + i * 295;
+      rline(c, [[x - 125, base], [x + 125, base]], { w: 3, color: P.ink2, seed: i + 3 });
+      const r = drawCirno(c, { x, y: base, h: hh, pose: p, mood: m, t: t + i * .37, blink: blinkAt(t, i + 1), gesture: Q.has('g') ? +Q.get('g') : null });
+      chMarks(c, r);
+      zh(c, p + ' · ' + m, x, base + 60, { size: 28, align: 'center', color: P.ink2 });
+    });
+  } },
+  // 头部放大的全部表情（最后一格：normal 说话张嘴）
+  moods: { w: 2280, h: 1260, draw(c, t) {
+    chPaper(c, 2280, 1260);
+    const moods = ['normal', 'proud', 'happy', 'surprised', 'confused', 'pout', 'cry', 'normal'], mo = +(Q.get('mouth') || 0);
+    moods.forEach((m, i) => { const cx = 285 + (i % 4) * 570, top = 20 + Math.floor(i / 4) * 620, hh = 1100, talk = i === 7;
+      c.save(); c.beginPath(); c.rect(cx - 285, top, 570, 560); c.clip();
+      drawCirno(c, { x: cx, y: top + 1150, h: hh, pose: 'stand', mood: m, t, mouth: talk ? .8 : mo, blink: Q.has('t') ? 0 : blinkAt(t, i + 2) });
+      c.restore();
+      zh(c, talk ? 'normal · 说话' : m, cx, top + 598, { size: 30, align: 'center', color: P.ink2 }); });
+  } },
+  // 和帕秋莉并排：帕秋莉 h=500、琪露诺 h=440，脚底同一条线（摊开的书上）
+  pair: { w: 1920, h: 1080, draw(c, t) {
+    spread(c, t);
+    const base = 880;
+    const a = drawPatchouli(c, { x: 700, y: base, h: 500, pose: 'lecture', mood: 'smug', t, blink: blinkAt(t), mouth: 0 });
+    const b = drawCirno(c, { x: 1160, y: base, h: 440, facing: -1, pose: Q.get('pose') || 'proud', mood: Q.get('mood') || 'proud', t, blink: blinkAt(t, 2), mouth: 0 });
+    chMarks(c, a); chMarks(c, b);
+    rline(c, [[520, base + 2], [1360, base + 2]], { w: 2, color: alpha(P.ink2, .5), seed: 9 });
+  } },
+  // 开发用：几个姿势放大看（?poses=a,b,c&moods=x,y,z&h=）
+  zoom: { w: 1800, h: 1000, draw(c, t) {
+    chPaper(c, 1800, 1000);
+    const ps = (Q.get('poses') || 'stand,proud,point,fly').split(','), ms = (Q.get('moods') || '').split(',');
+    ps.forEach((p, i) => { const x = 1800 / ps.length * (i + .5), y = 960;
+      rline(c, [[x - 200, y], [x + 200, y]], { w: 3, color: P.ink2, seed: i + 3 });
+      const r = drawCirno(c, { x, y, h: +(Q.get('h') || 820), pose: p, mood: ms[i] || 'normal', t, facing: +(Q.get('facing') || 1), blink: 0, mouth: +(Q.get('mouth') || 0), gesture: Q.has('g') ? +Q.get('g') : null }); chMarks(c, r); });
+  } },
+};
+const chWho = Q.get('who') === 'cirno' ? CH_CIR : CH_SHEETS;
+const chSel = Q.get('sheet'), chFixed = Q.has('t') ? +Q.get('t') : null, chList = chSel ? [chSel] : Object.keys(chWho);
+const chCvs = chList.map(k => { const cv = document.createElement('canvas'), S = chWho[k]; cv.width = S.w; cv.height = S.h; cv.id = 'sheet-' + k; cv.style.width = Math.min(S.w, 1600) + 'px'; document.getElementById('wrap').appendChild(cv); return [cv.getContext('2d'), S]; });
+function chDraw(t) { for (const [c, S] of chCvs) { c.save(); S.draw(c, t); c.restore(); } }
+window.__chDraw = chDraw;
+// 性能：画一次 drawPatchouli 的平均毫秒（1920×1080 画布，h=520）
+window.__chBench = n => { const cv = document.createElement('canvas'); cv.width = 1920; cv.height = 1080; const c = cv.getContext('2d'); const poses = ['stand', 'lecture', 'point', 'hide', 'cross', 'sit', 'peek', 'tired', 'lift', 'lie'], out = {};
+  c.getImageData(0, 0, 1, 1);
+  for (const p of poses) { const t0 = performance.now(); for (let i = 0; i < n; i++) drawPatchouli(c, { x: 900, y: 900, t: i / 30, mouth: .5, pose: p, mood: i % 2 ? 'pout' : 'normal' }); c.getImageData(0, 0, 1, 1); out[p] = +((performance.now() - t0) / n).toFixed(2); }
+  return out; };
+// 性能：画一次 drawCirno 的平均毫秒（1920×1080 画布，h=460）
+window.__cirBench = n => { const cv = document.createElement('canvas'); cv.width = 1920; cv.height = 1080; const c = cv.getContext('2d'); const poses = ['stand', 'proud', 'point', 'hold', 'think', 'slump', 'fly', 'throw'], moods = ['normal', 'proud', 'cry', 'confused'], out = {};
+  c.getImageData(0, 0, 1, 1);
+  for (const p of poses) { const t0 = performance.now(); for (let i = 0; i < n; i++) drawCirno(c, { x: 900, y: 900, t: i / 30, mouth: (i % 7) / 7, pose: p, mood: moods[i % 4] }); c.getImageData(0, 0, 1, 1); out[p] = +((performance.now() - t0) / n).toFixed(2); }
+  return out; };
+document.fonts.load(`40px ${ZH}`, '帕秋莉哼').then(() => document.fonts.ready).then(start, start);
+function start() {
+  if (chFixed !== null) { chDraw(chFixed); window.__ready = true; return; }
+  const t0 = performance.now(); const loop = () => { chDraw((performance.now() - t0) / 1000); requestAnimationFrame(loop); }; loop(); window.__ready = true;
+}
+</script>
+</body>
+</html>
