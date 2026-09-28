@@ -15,15 +15,15 @@
 // 顶层名字一律带本段前缀 S2 / s2。
 const S2LINES = seq(1.0, [
   '换成一整句话。我来猜你的下一个字，猜中了，你就不用传。',
-  ['床前明月光，疑是地上……', { who: 'cirno', hold: 1.0 }],
+  ['床前明月光，疑是地上……', { who: 'cirno', hold: .8 }],
   ['霜。这个字几乎不用听，只花 0.01 比特。', { mood: 'smug', hold: .4 }],
   ['今天的晚饭是……冰冻青蛙！', { who: 'cirno', mood: 'proud', hold: .6 }],
   ['「青蛙」我可猜不到，一下就贵了。', { mood: 'surprised', hold: .4 }],
-  ['猜得越准，要传的越少：预测和压缩，是同一件事。', { pause: .2, hold: .5 }],
-  ['上一集的「惊讶」，就是要付的比特。', { hold: .7 }],
-  ['香农让人一个字母一个字母地猜英文，', { pause: .8, hold: .3 }],
-  ['英语每个字母只要 1 比特左右。', { hold: 1.0 }],
-  ['一个汉字在电脑里占 16 比特；让会猜的模型来猜，只要 3.5 比特左右。', { pause: .9, hold: .5 }],
+  ['猜得越准，要传的越少：预测和压缩，是同一件事。', { hold: .5 }],
+  ['上一集的「惊讶」，就是要付的比特。', { hold: .6 }],
+  ['香农让人一个字母一个字母地猜英文，', { pause: .6, hold: .3 }],
+  ['英语每个字母只要 1 比特左右。', { hold: .8 }],
+  ['一个汉字在电脑里占 16 比特；让会猜的模型来猜，只要 3.5 比特左右。', { pause: .8, dur: 6.6 }],
 ]);
 const S2T = i => S2LINES[i][0], S2E = i => S2LINES[i][1];
 // S2W：第 i 句说到 f（0..1）处的时间（按语音长度，不含句尾 hold）
@@ -52,7 +52,7 @@ const S2BOX = { x: 210, y: 640, s: 1.1 };                          // 纸条上�
 const S2SLOT = S2BOX.x + 70 * S2BOX.s, S2LEAD = 60, S2X0 = S2SLOT + S2LEAD;   // 纸带从盒子右边的缝出来，先是一截空白引纸
 const S2YA = 640, S2YA2 = 190, S2YB = 640;                         // 第一条纸带（撕下后挪到上面），第二条纸带
 const S2FOLLOW = 1350;                                             // 第二句：纸带头超过屏幕 x=1350 后镜头跟着走
-const S2ZOOM = { X: S2RX + 290, Y: -110, s: .78 };                    // L5–L6 拉远看两条纸带
+const S2ZOOM = { X: S2RX + 290, Y: -120, s: .7 };                    // L5–L6 拉远看两条纸带
 const S2Z = (sx, sy) => [sx / S2ZOOM.s + S2ZOOM.X - S2RX, sy / S2ZOOM.s + S2ZOOM.Y];   // 拉远时屏幕点 → 纸条局部坐标
 // 书页上的冰网络：网络坐标 (CX, 470) 放到世界 (CX, 440)，缩小 .55
 const S2NT = { x: CX, y: 440, s: .75 };
@@ -184,7 +184,7 @@ function s2Holes(G, y, rows = 2) {
 }
 const S2HOLES = (() => { const all = [...s2Holes(S2GA, S2YA2), ...s2Holes(S2GB, S2YB)].sort((a, b) => a[0] - b[0]);
   const [a, b] = S2B.fly, n = all.length, dt = .55; return all.map((q, j) => ({ q, t0: lerp(a, b - dt, j / Math.max(1, n - 1)), dt })); })();
-const S2SRC = S2Z(215, 836);   // L6 那颗大「惊讶」火花（拉远画面里的屏幕位置换成纸条坐标）
+const S2SRC = S2Z(215, 746);   // L6 那颗大「惊讶」火花（拉远画面里的屏幕位置换成纸条坐标）
 
 // ===================== A：书页上的冰网络 → 纸带 =====================
 function s2Book(c, tau) {
@@ -252,9 +252,9 @@ function s2Strip(c, tau) {
     zh(c, s, x, y + 14, { size: 40, color: P.ink, p: writeP(tau, t0, s, .04) }); };
   const tk = 1 - sm(B.toShannon[1] - .2, B.toShannon[1], tau);
   if (tk > 0) fade(c, tk, () => { tot(S2GA, S2YA2, B.totA); tot(S2GB, S2YB, B.totB);
-    const [ex, ey] = S2Z(190, 770), eqA = sm(B.eq, B.eq + .3, tau);
+    const [ex, ey] = S2Z(190, 680), eqA = sm(B.eq, B.eq + .3, tau);
     if (eqA > 0) zh(c, '预测 ＝ 压缩', ex, ey, { size: 70, color: P.ink, p: writeP(tau, B.eq, '预测 ＝ 压缩', .07) });
-    const [sx, sy] = S2Z(250, 856), sa = sm(B.surp, B.surp + .3, tau);
+    const [sx, sy] = S2Z(250, 766), sa = sm(B.surp, B.surp + .3, tau);
     if (sa > 0) { zh(c, '惊讶 ＝ 要付的比特', sx, sy, { size: 52, color: P.red, p: writeP(tau, B.surp, '惊讶 ＝ 要付的比特', .06) });
       netSparkPiece(c, S2SRC[0], S2SRC[1], 26 * easeOutBack(clamp((tau - B.surp) / .4, 0, 1)), tau * 2, sa, 3990); }
   });
