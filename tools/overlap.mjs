@@ -11,7 +11,7 @@ const hits = await page.evaluate(({ step, thr, DUR }) => {
   for (let t = 0; t < DUR; t += step) {
     __boxes.length = 0; renderAt(c, t, .5);
     for (const b of __boxes) {
-      const x0 = Math.max(0, Math.floor(b.x0 / 2 + 4)), x1 = Math.min(960, Math.ceil(b.x1 / 2 - 4)), y0 = Math.max(0, Math.floor(b.y0 / 2 + 4)), y1 = Math.min(462, Math.ceil(b.y1 / 2 - 4));   // 字幕区以下不算
+      const x0 = Math.max(0, Math.floor(b.x0 + 4)), x1 = Math.min(960, Math.ceil(b.x1 - 4)), y0 = Math.max(0, Math.floor(b.y0 + 4)), y1 = Math.min(462, Math.ceil(b.y1 - 4));   // 字幕区以下不算
       if (x1 - x0 < 8 || y1 - y0 < 8) continue;
       const ring = [], R = 18, d = c.getImageData(Math.max(0, x0 - R), Math.max(0, y0 - R), Math.min(960, x1 + R) - Math.max(0, x0 - R), Math.min(540, y1 + R) - Math.max(0, y0 - R));
       const ox = Math.max(0, x0 - R), oy = Math.max(0, y0 - R), px = (i, j) => { const k = ((j - oy) * d.width + (i - ox)) * 4; return [d.data[k], d.data[k + 1], d.data[k + 2]]; };
