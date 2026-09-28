@@ -164,7 +164,7 @@ const S4RAND = (() => { const sq = Array.from({ length: 64 }, (_, i) => i), r = 
   for (let i = 63; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [sq[i], sq[j]] = [sq[j], sq[i]]; }
   return S4REAL.map(([t, , , w], i) => [t, sq[i] % 8, 1 + Math.floor(sq[i] / 8), w]); })();
 const S4KEEP = [3, 11, 17];   // 乱摆盘上复原对的那三颗
-const S4PH = { k: 64, q: 62, b: 58, n: 58, r: 56, p: 50 };   // 各棋子高（像素，k = 1 时）
+const S4PH = { k: 78, q: 75, b: 70, n: 70, r: 68, p: 62 };   // 各棋子高（像素，k = 1 时）
 
 // 冰圈：棋盘平面上围住一组格子的圆角框（投影成多边形）
 function s4Ring(B, G, pos) {
@@ -248,7 +248,7 @@ function s4Stack(c, s, n, lab, al = 1, lift = 0) {
     s4IceFace(c, [[x + w / 2, top - h], [x + w / 2 + d, top - h - d], [x + w / 2 + d, top - d], [x + w / 2, top]], EP2_ICE_DEEP, .95);
     s4IceFace(c, rectPts(x - w / 2, top - h, w, h), EP2_ICE, .95);
     c.strokeStyle = alpha('#ffffff', .9); c.lineWidth = 2; c.strokeRect(x - w / 2, top - h, w, h);
-    zh(c, S4LABELS[s], x, top - h / 2 + 1, { size: S4LABELS[s].length > 6 ? 21 : 24, color: P.ink, align: 'center', base: 'middle' });
+    zh(c, S4LABELS[s], x, top - h / 2 + 1, { size: S4LABELS[s].length > 5 ? 21 : 24, color: P.ink, align: 'center', base: 'middle' });
     c.restore(); }
   c.restore();
 }
@@ -276,16 +276,16 @@ function s4Explain(c, tau) {
   c.restore();
   // 旧的长句被划掉、飘走的一小截：越说越短
   if (idx > 0) { const old = S4TALK[idx - 1], u = sm(t0, t0 + .5, tau); if (u < 1) zh(c, old.slice(0, 12) + '…', bx + 30, by - 20 - u * 40, { size: 24, color: P.g2, al: 1 - u }); }
-  seal(c, bx + bw + 4, by - 6, 'exp', { k: sm(B.seal2, B.seal2 + .55, tau, t => t), r: 24 });
-  zh(c, '自我解释，Bisra 等 2018', bx + bw - 14, by - 22, { size: 22, color: P.ink2, align: 'right', al: sm(B.seal2 + .3, B.seal2 + .7, tau) });
+  seal(c, bx + bw + 2, by + bh + 2, 'exp', { k: sm(B.seal2, B.seal2 + .55, tau, t => t), r: 24 });
+  zh(c, '自我解释，Bisra 等 2018', bx + bw - 28, by + bh + 34, { size: 22, color: P.ink2, align: 'right', al: sm(B.seal2 + .3, B.seal2 + .7, tau) });
   c.restore();
 }
 
 // ===================== 两人走位 =====================
 function s4Cast(c, tau, L) {
   const B = S4B, T = S4T, E = S4E, w = S4W;
-  const px = key(tau, [[B.cellsOff[0], 330], [B.cellsOff[0] + 1.1, 170], [T(7), 170], [T(7) + 1.1, 250], [B.ret[0], 250], [B.ret[1] - .2, EP3.pch.x]]);
-  const pWalk = Math.abs(key(tau + .05, [[B.cellsOff[0], 330], [B.cellsOff[0] + 1.1, 170], [T(7), 170], [T(7) + 1.1, 250], [B.ret[0], 250], [B.ret[1] - .2, EP3.pch.x]]) - px) > .3;
+  const px = key(tau, [[B.cellsOff[0], 330], [B.cellsOff[0] + 1.1, 195], [T(7), 195], [T(7) + 1.1, 250], [B.ret[0], 250], [B.ret[1] - .2, EP3.pch.x]]);
+  const pWalk = Math.abs(key(tau + .05, [[B.cellsOff[0], 330], [B.cellsOff[0] + 1.1, 195], [T(7), 195], [T(7) + 1.1, 250], [B.ret[0], 250], [B.ret[1] - .2, EP3.pch.x]]) - px) > .3;
   let pPose = 'lecture', pMood, pGest = null;
   if (tau >= T(2) && tau < T(7)) { pPose = 'point'; }
   if (tau >= T(7) && tau < T(8)) { pPose = 'cross'; pMood = 'smug'; }
@@ -426,7 +426,7 @@ function s4Draw(c, tau, L) {
     // 十道错题：从那一摞摊开成一把扇子，再合回去
     const fo = sm(B.fan[0], B.fan[1], tau, easeOutBack) * (1 - sm(B.fold[0], B.fold[1], tau));
     if (fo > 0 && tau < B.fold[1]) { const [hx, hy] = s4StackPos(S4HOT), px = hx, py = hy - 40 - hotLift;
-      for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + (k - 4.5) * .2, R = 200 * fo; s4Card(c, px + Math.cos(a) * R, py + Math.sin(a) * R * .9, a + Math.PI / 2, 1.15, Math.min(1, fo * 2), 900 + k, true); } }
+      for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + (k - 4.5) * .2, R = 180 * fo; s4Card(c, px + Math.cos(a) * R, py + Math.sin(a) * R * .9, a + Math.PI / 2, 1.15, Math.min(1, fo * 2), 900 + k, true); } }
   }
 
   // ---- 两人 ----
@@ -451,7 +451,7 @@ function s4Draw(c, tau, L) {
   // 问号冰晶 + 一根线连到那一摞
   const ask = Math.min(sm(B.ask[0], B.ask[0] + .4, tau, easeOutBack), 1 - sm(B.ask[1], B.ask[1] + .3, tau));
   if (ask > 0) { const [hx, hy] = s4StackPos(S4HOT), q = [760 + 0, 330];
-    thread(c, [q[0] + 70, q[1]], [hx - 90, hy - 90 - hotLift], { p: sm(B.ask[0] + .3, B.ask[0] + 1.0, tau), sag: 50, color: alpha('#5f86a6', ask) });
+    thread(c, [q[0] + 70, q[1]], [hx - 20, hy - 118 - hotLift], { p: sm(B.ask[0] + .3, B.ask[0] + 1.0, tau), sag: 50, color: alpha('#5f86a6', ask) });
     pop(c, q[0], q[1], ask, () => s4Crystal(c, q[0], q[1], 56, 1, tau)); }
   s4Explain(c, tau);
 }
