@@ -337,8 +337,9 @@ function thread(c, a, b, o = {}) { const { color = '#6b4f55', w = 2.2, p = 1, sa
   const pts = []; for (let i = 0; i <= 20; i++) { const u = i / 20; pts.push([lerp(a[0], b[0], u), lerp(a[1], b[1], u) + Math.sin(u * Math.PI) * s]); }
   rline(c, pts, { w, color, p, seed, amp: .4 }); return pts; }
 // popup：立体书——以 foldY 这条折线为轴，把 fn 画的东西从书页上「立起来」，k 0..1（0 = 平躺，1 = 立起）
-function popup(c, foldY, k, fn) { if (k <= .001) return; c.save(); c.translate(0, foldY); c.scale(1, k); c.translate(0, -foldY); fn(); c.restore();
-  if (k < .98) { c.save(); c.globalAlpha *= (1 - k) * .5; c.fillStyle = 'rgba(40,25,15,.25)'; c.fillRect(0, foldY - 2, W, 4); c.restore(); } }
+// span = [x0, x1]：折线阴影只画立起物件那一段（默认整个画面宽，第 1、2 集的调用不变）
+function popup(c, foldY, k, fn, span = [0, W]) { if (k <= .001) return; c.save(); c.translate(0, foldY); c.scale(1, k); c.translate(0, -foldY); fn(); c.restore();
+  if (k < .98) { c.save(); c.globalAlpha *= (1 - k) * .5; c.fillStyle = 'rgba(40,25,15,.25)'; c.fillRect(span[0], foldY - 2, span[1] - span[0], 4); c.restore(); } }
 // vellum：半透明的硫酸纸（叠在别的东西上，下面隐约透出来）
 function vellum(c, pts, o = {}) { return cutPaper(c, pts, o.color || '#f4f1ea', { step: 20, grain: .05, blur: 4, ...o, al: (o.al ?? 1) * .55 }); }
 // spin：绕 (x, y) 转 a 弧度后画 fn（转盘）

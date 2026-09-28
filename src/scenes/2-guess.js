@@ -268,7 +268,7 @@ function s2Strip(c, tau) {
 }
 
 // ===================== C：香农猜字（局部坐标 = 屏幕坐标） =====================
-// 例句照香农 1951 的例子：猜对的位置记「-」，猜错的写出字母。S2WRONG 是猜错的位置（空格也要猜）。
+// 例句和猜错位置照香农 1951 原文第 54 页第一组逐字核对过（----ROO------NOT-V-----I------SM----OBL---）：猜对的位置记「-」，猜错的写出字母。S2WRONG 是猜错的位置（空格也要猜）。
 const S2EN = 'THE ROOM WAS NOT VERY LIGHT A SMALL OBLONG';
 const S2WRONG = [4, 5, 6, 13, 14, 15, 17, 23, 30, 31, 36, 37, 38];
 const S2RED = [...S2EN].map((ch, i) => S2WRONG.includes(i) ? ch : '-').join('');

@@ -8,7 +8,7 @@
 //   L5    字倒着流回书里、结也被吸回去，书一页页变薄，封底吐出一截短纸带（tape），盖「定」蜡封（算术编码）。
 //   L6    琪露诺从右页一路走到左页问话；小书缩到右页右边，右页左边掉下一个打了绳结的纸包（压缩包）。
 //   L7    上方一行「我是最强的！」×3：后两遍缩成两个小指针箭头指回第一遍（LZ 的做法）；
-//         下面两截纸带比「新写中文每个字」要打的孔：纸包（gzip）长，魔导书（模型）短（BITS.dial.new）。
+//         下面两截纸带比「新写中文每个字」要打的孔：纸包（gzip，用长文本《故乡》的数，短文本上 gzip 的字典开销会夸大差距）长，魔导书（模型，新写中文）短。
 //   L8    两组剪纸条：图片 PNG 58.5% / 模型 43.4%，声音 FLAC 30.3% / 模型 16.4%（Delétang 等 2024），盖「实」蜡封。
 //   L9    下面一块跷跷板：左边 PNG、FLAC，右边模型；一摞大书砸在模型那头「模型本身 ≈ 140 GB（Chinchilla 70B）」，板子压翻。
 //   L10–L11 31 枚图钉钉在右页上排成几乎一条直线（示意图，不画刻度），一根线穿过去，盖「相」蜡封。
@@ -117,7 +117,7 @@ function s3Book(c, bp, inner) {
     for (let r = 0; r < 4; r++) rline(c, [[30, -96 + r * 64], [hw - 34, -96 + r * 64]], { w: 1.2, color: alpha(P.ink2, .12), seed: 3620 + r });   // 右页淡横格
     inner(c);
     c.restore();
-  });
+  }, [bp.x - (S3BK.hw + 16) * bp.s, bp.x + (S3BK.hw + 16) * bp.s]);
 }
 
 // 羽毛笔：笔尖在 (x, y)，杆往右上斜
@@ -265,7 +265,7 @@ function s3Parcels(c, tau) {
   // 新写的中文，每个字要打的孔：纸包（gzip）一长截，魔导书（模型）一小截
   const ta = sm(B.tapes[0], B.tapes[1], tau, easeOut);
   if (ta > 0) {
-    tape(c, { x: 1045, y: 640, cells: [{ bits: BITS.dial.new.gzip }], unit: 14, h: 44, p: ta });
+    tape(c, { x: 1045, y: 640, cells: [{ bits: BITS.dial.old.gzip }], unit: 14, h: 44, p: ta });
     tape(c, { x: 1560, y: 640, cells: [{ bits: BITS.dial.new.model }], unit: 14, h: 44, p: ta });
     zh(c, '同一段新写的中文，每个字要打的孔', 1330, 726, { size: 28, color: P.ink2, align: 'center', al: sm(.6, 1, ta) });
   }
@@ -309,7 +309,7 @@ function s3Bars(c, tau) {
           for (let k = 0; k < 5; k++) s3Tome(c, 1650 + (hash(k, 37) - .5) * 26, base - k * 52, 190 - k * 8, 50, cols[k], 3790 + k * 10);
         }
       });
-    });
+    }, [1030, 1740]);
     const la = sm(B.drop[1], B.drop[1] + .35, tau);
     if (la > 0) { zh(c, '模型本身 ≈ 140 GB', 1530, 660, { size: 34, color: P.ink, align: 'right', al: la }); zh(c, '（Chinchilla 70B）', 1530, 700, { size: 26, color: P.ink2, align: 'right', al: la }); }
   }

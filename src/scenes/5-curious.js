@@ -57,7 +57,7 @@ function s5Draw(c, tau, L) {
   S5.books.forEach((b, i) => {
     const k = inK(i); if (k <= .001) return;
     fade(c, foc[i], () => {
-      popup(c, S5.shelfY, k, () => s5Book(c, b.x, S5.shelfY, b.kind, tau, { a1, b1, a2, b2, a3, b3, i }));
+      popup(c, S5.shelfY, k, () => s5Book(c, b.x, S5.shelfY, b.kind, tau, { a1, b1, a2, b2, a3, b3, i }), [b.x - 150, b.x + 150]);
       s5Tape(c, b, tau, clamp((tau - (a0 + .5 + i * .28)) / .6, 0, 1) * (1 - out), { a2, b2, a3, b3 });
     });
   });

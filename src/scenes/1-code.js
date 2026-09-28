@@ -336,7 +336,7 @@ function s1Shelf(c, tau, sh, k) {
         zh(c, '一半的时候都是它', bb.x + bb.w / 2, y - 12, { size: 26, color: P.ink2, align: 'center', al: bk2 }); }
       if (pick > 0) sparkle(c, bb.x + bb.w - 14, S1BASE - bb.h - 14, 16 * win(B.pick, B.pick + 1.2, tau, .3), { color: P.moon });
     }
-  });
+  }, [sh.x - 18, sh.x + S1SW + 18]);
 }
 function s1PageC(c, tau) {
   const B = S1B; if (tau < B.toBook[0]) return;
