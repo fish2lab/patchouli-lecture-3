@@ -63,3 +63,12 @@ function waterDrop(c, x, y, r, o = {}) {
   c.fillStyle = alpha('#ffffff', .75); c.beginPath(); c.ellipse(x - r * .32, y - r * .15, r * .16, r * .28, -.4, 0, TAU); c.fill();
   c.restore();
 }
+
+// ===================== 第 3 集 =====================
+//   EP3   标准站位：每段开头 0.8 秒和结尾 0.8 秒两人都在这里（翻页转场盖得住），中间随便走位。
+//   EP3_TAPE_COL  八音盒纸带的纸色、孔色
+const EP3 = {
+  pch: { x: 330, y: 880, h: 500 },                        // 帕秋莉：左页左侧，脚底
+  cir: { x: 1600, y: 880, h: 440, facing: -1 },           // 琪露诺：右页，脚底，朝左
+};
+const EP3_TAPE_COL = { paper: '#efe6cf', edge: '#cdbd97', hole: '#3a2c2a' };

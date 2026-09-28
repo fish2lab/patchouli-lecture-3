@@ -3,3 +3,4 @@ out/
 dist/
 fonts/*.ttf
 .claude/
+tools/bits/.venv/

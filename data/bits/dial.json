@@ -1,0 +1,23 @@
+{
+ "model": "Qwen/Qwen3-1.7B-Base",
+ "guxiang": {
+  "chars": 5064,
+  "utf8": 23.72,
+  "gbk": 15.86,
+  "zero": 8.05,
+  "gzip": 11.56,
+  "xz": 11.13,
+  "model": 0.59,
+  "arith": 0.59
+ },
+ "new": {
+  "chars": 239,
+  "utf8": 24.0,
+  "gbk": 16.0,
+  "zero": 6.95,
+  "gzip": 17.61,
+  "xz": 20.75,
+  "model": 3.46,
+  "arith": 3.47
+ }
+}

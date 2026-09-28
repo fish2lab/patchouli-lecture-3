@@ -31,9 +31,10 @@ function cnInt(n) {   // 0..9999 → 汉字读法（10 读「十」，15 读「�
   return out;
 }
 const numbers = t => t.replace(/(\d{4})(?=\s*年)/g, y => [...y].map(d => DIG[d]).join(''))   // 年份逐字读
+  .replace(/(\d+)\.(\d+)/g, (_, i, f) => cnInt(+i) + '点' + [...f].map(d => DIG[d]).join(''))   // 小数：1.75 读一点七五
   .replace(/\d+/g, n => cnInt(+n));
 // 拼音表里没有的词：拉丁字母、口癖
-const WORDS = { 'Q': 'キュー', 'buff': 'バフ', 'WHO': 'ダブリューエイチオー', 'delta': 'デルタ',
+const WORDS = { 'Q': 'キュー', 'buff': 'バフ', 'WHO': 'ダブリューエイチオー', 'delta': 'デルタ', 'PNG': 'ピーエヌジー', 'FLAC': 'フラック',
   '得你': 'デイニー', '你得': 'ニーデイ' };   // 「得」读 děi 的地方（pinyin-pro 按 de 读）
 const WORDS_RE = new RegExp(Object.keys(WORDS).sort((a, b) => b.length - a.length).join('|'), 'g');
 function toKoe(text) {
