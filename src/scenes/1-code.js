@@ -236,7 +236,7 @@ function s1Flap(c, r, cy, th) {
 }
 // 剪刀：(x, y) 是刀口，ang 朝前方向，open 张开角
 function s1Scissors(c, x, y, ang, open, al = 1) {
-  if (al <= 0) return; c.save(); c.globalAlpha *= al; c.translate(x, y); c.rotate(ang);
+  if (al <= 0) return; c.save(); c.globalAlpha *= al; c.translate(x, y); c.rotate(ang); c.scale(1.35, 1.35);
   const steel = mix(P.g1, P.g2, .45), grip = mix(P.purple, P.ink, .1);
   for (const s of [-1, 1]) { c.save(); c.rotate(s * open);
     cutPaper(c, [[0, 0], [-8, -6 * s], [-150, -4 * s], [-150, 3 * s]].map(([a, b]) => [a + 70, b]), steel, { seed: 3700 + s, step: 12, blur: 4 });
@@ -308,7 +308,7 @@ function s1Shelf(c, tau, sh, k) {
       const cy = y0 + bk.h / 2, name = S1MSG[bk.k].t;
       if (bk.w >= 120) zh(c, name, bk.x + bk.w / 2, cy + 10, { size: Math.min(30, (bk.w - 20) / [...name].length), color: P.cap, align: 'center' });
       else s1Vert(c, name, bk.x + bk.w / 2, cy, Math.min(26, (bk.h - 34) / [...name].length), P.cap);
-      zh(c, String(bk.b), bk.x + bk.w / 2, y0 - 12, { size: 28, color: P.ink2, align: 'center' });
+      zh(c, String(bk.b), bk.x + bk.w / 2, y0 - 12, { size: 28, color: P.ink2, align: 'center', al: sh.key === 'code' && bk.k === 0 ? 1 - sm(B.brace, B.brace + .3, tau) : 1 });
       s1Frac(c, 1, S1MSG[bk.k].d, bk.x + bk.w / 2, S1BASE + 46, 22);
     }
     // 硫酸纸：把这一排书的面积摊平，高度 = 平均比特
