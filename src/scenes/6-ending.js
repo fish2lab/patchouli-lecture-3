@@ -16,18 +16,15 @@
 // 顶层名字一律带本段前缀 S6 / s6。
 const S6LINES = seq(1.0, [
   ['帕秋莉！三百道错题，我压成了一张卡片！', { who: 'cirno', mood: 'proud' }],
-  '能猜到的，就不用记。',
-  '先找规律，',
-  '讲给别人听，',
-  '错题按原因归类。',
+  ['能猜到的，就不用记。', { hold: 1.2 }],
   ['果然，我是最强的！', { who: 'cirno', mood: 'proud' }],
   ['……这句还是只值 1 比特。下课。', { mood: 'smug', hold: 0.6 }],
 ]);
 const s6T = i => S6LINES[i][0], s6E = i => S6LINES[i][1];
 // 节拍（都从台词时间推出来）
-const S6K = (() => { const e0 = s6E(0), e6 = s6E(6), close0 = e6 - 1.0, close1 = close0 + 1.6;
+const S6K = (() => { const e0 = s6E(0), e6 = s6E(3), close0 = e6 - 1.0, close1 = close0 + 1.6;
   return { card0: s6T(0) - .05, card1: s6T(0) + .35, move0: e0 + .05, move1: e0 + .75,
-    tape0: s6T(5) + .15, punch: s6T(5) + .9, bit: s6T(6) + 1.1, bow0: e6 - 2.3, bow1: e6 - 1.4, close0, close1, slide1: close1 + .8,
+    tape0: s6T(2) + .15, punch: s6T(2) + .9, bit: s6T(3) + 1.1, bow0: e6 - 2.3, bow1: e6 - 1.4, close0, close1, slide1: close1 + .8,
     title: close1 + .55, cred0: close1 + 1.3, credStep: .35, tilt0: close1 + 6.5, tilt1: close1 + 10.5, tilt2: close1 + 12.6, end: close1 + 13 }; })();
 const S6GOLD = mix(P.moon, P.cap, .32);                                // 封面金墨（和第 1、2 集片尾同一种）
 const S6CW = BOOK.w / 2 + 20;                                          // 封面宽

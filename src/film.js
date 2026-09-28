@@ -35,3 +35,19 @@ function pageFlip(c, tau) {
   c.fillStyle = g; c.fill(polyPath(pts));
   c.restore();
 }
+// 穿模检查（开发用）：?bbox 在两人身上画红框；?nochar 不画人物、只记包围框（tools/overlap.mjs 用）。
+// 包围框按锚点和身高估：帕秋莉宽 0.5h，琪露诺连翅膀宽 0.7h；在当前变换下换算成屏幕坐标，记进 __boxes。
+if (Q.has('bbox') || Q.has('nochar')) {
+  const noChar = Q.has('nochar'), W0 = { patchouli: .5, cirno: .7 };
+  window.__boxes = [];
+  const wrap = (fn, who) => (c, o = {}) => {
+    const h = o.h || (who === 'cirno' ? 460 : 520), w = h * W0[who], x = o.x || 0, y = o.y || 0, m = c.getTransform(), al = c.globalAlpha;
+    const pts = [[x - w / 2, y - h], [x + w / 2, y - h], [x - w / 2, y], [x + w / 2, y]].map(([px, py]) => [m.a * px + m.c * py + m.e, m.b * px + m.d * py + m.f]);
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+    if (al > .3) __boxes.push({ who, x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) });
+    let r; if (noChar) { c.save(); c.globalAlpha = 0; r = fn(c, o); c.restore(); } else r = fn(c, o);   // 场景会用返回的锚点，照样调用、只是不画
+    if (Q.has('bbox')) { c.save(); c.setTransform(m); c.strokeStyle = '#e00'; c.lineWidth = 3; c.strokeRect(x - w / 2, y - h, w, h); c.restore(); }
+    return r;
+  };
+  drawPatchouli = wrap(drawPatchouli, 'patchouli'); drawCirno = wrap(drawCirno, 'cirno');
+}

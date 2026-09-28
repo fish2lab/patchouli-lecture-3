@@ -15,7 +15,7 @@ import { openFilm, ROOT } from './browser.mjs';
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i < 0 ? d : process.argv[i + 1]; };
 const FF = process.env.FFMPEG || 'ffmpeg';
-const VOICES = { patchouli: { voice: 'f1', speed: 120 }, cirno: { voice: 'f2', speed: 125 } };
+const VOICES = { patchouli: { voice: 'f1', speed: 110 }, cirno: { voice: 'f2', speed: 115 } };   // 第 3 集第三稿放慢（原 120 / 125），照顾没有基础的观众
 
 // ---- 中文 → 音声记号 ----
 const DIG = '零一二三四五六七八九';
