@@ -384,8 +384,8 @@ function s0Patchouli(c, tau, L) {
   else { pose = 'lecture'; mood = 'normal'; look = .3; }
   drawPatchouli(c, { ...E, x, y: E.y - hop, pose, mood, look, gesture, tilt, mouth, blink, t: tau });
 }
-// 琪露诺：推着卷子进来（双手推在卷子右侧：throw 姿势 gesture 1、朝左时，手在脚底左边 115 像素）→ 松手跳回站位
-const S0PUSH_DX = S0PILE.w / 2 + 115;
+// 琪露诺：推着卷子进来（双手推在右边露出的卷角上：throw 姿势 gesture 1、朝左时，手在脚底左边 115 像素）→ 松手跳回站位
+const S0PUSH_DX = S0PILE.w / 2 + S0PILE.out + 115 - 8;
 function s0Cirno(c, tau, L) {
   if (tau < S0H.push0) return;
   const E = EP3.cir, T = s0T, mouth = mouthOf(L, 'cirno'), blink = blinkAt(tau, 2);
