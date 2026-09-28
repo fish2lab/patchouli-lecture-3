@@ -1,37 +1,47 @@
 'use strict';
 // 第 0 段：开场（魔导书编配，照抄第 2 集开场：斜看合着的书 → 镜头转正上方、金墨写封面 → 铜扣弹开 → 封面翻开直接落到两人所在的书页）。
-//   0–2.85 秒：封面「帕秋莉讲座 · 第 3 集」，翻开后左页是淡墨七曜阵和看书的帕秋莉，右页扉页是本集标题。
-//   2.85 秒：琪露诺举着一大卷打满孔的八音盒纸带从右边飞进来（她的错题本），3.5 秒把纸带头按在右页上，
-//            纸卷「哗」地往左滚过两页，摊开一长条又密又乱的孔（S0TAPE），扉页收掉。
-//   L0 琪露诺指着纸带，「最强的」握拳、迸冰晶；纸带尾上挂一张小签「错题本 · 300 道」。
-//   L1 帕秋莉身后一排排书架剪影从书页上立起来（十万本书），「你猜」时她转头看琪露诺。
-//   L2 琪露诺往前走一步、歪头冒问号。
-//   L3「一本都没背」书架淡掉；「我只记猜不到的那一点点」纸带上绝大多数孔被一层纸色盖淡，只剩零星几个孔亮着（预告主题）。
-//   最后约 1 秒：纸带收掉，回到标准画面。
+//   0–2.85 秒：封面「帕秋莉讲座 · 第 3 集」，翻开后左页是淡墨七曜阵和看书的帕秋莉，右页扉页是本集标题（两行）。
+//   扉页标题完整停留 S0TITLE_HOLD = 0.6 + 0.07 × 标题字数 秒（22 字 → 2.14 秒），之后的节拍全部顺延。
+//   然后琪露诺从右边推着一摞比她还高的错题卷子进场（每张露出一角红叉和分数），卷子摇摇晃晃停在右页中间，她退回站位。
+//   L0 琪露诺指着卷子，「最强的」握拳蹦、迸冰晶，卷子跟着一晃。
+//   L1 帕秋莉身后一排排书架剪影从书页上立起来（十万本书）。
+//   L2 琪露诺手指点下巴、冒问号（原地，不往卷子那边走）。
+//   L3「一本都没背」书架淡掉；「猜不到」时绝大多数卷子褪成白纸，只剩几张红叉的亮着（预告主题）；帕秋莉往前一步指着卷子。
+//   最后约 1 秒：卷子收掉，回到标准画面。
+// 站位区（防穿模）：帕秋莉 x 205–455（左页左侧），琪露诺 x 1446–1754（右页右侧）；卷子放在两区之间 x 1029–1431，书架只在帕秋莉身后当背景。
 //
 // 【交接给第 1 段】最后约 1 秒画面静止，严格是：
 //   spread(c, tau)
 //   drawPatchouli(c, { ...EP3.pch, pose: 'lecture', mood: 'normal', mouth: 0, blink: blinkAt(tau), t: tau })
 //   drawCirno(c, { ...EP3.cir, pose: 'stand', mood: 'normal', mouth: 0, blink: blinkAt(tau, 2), t: tau })
 // 书页上没有页眉、没有别的东西。
-// 顶层名字一律带本段前缀 S0 / s0。
-const S0LINES = seq(3.8, [
-  ['帕秋莉！这三百道错题，我要全背下来！我可是最强的！', { who: 'cirno', mood: 'proud' }],
-  ['我这座图书馆有十万本书。你猜，我是怎么记住的？', { mood: 'smug' }],
-  ['……全背下来？', { who: 'cirno', mood: 'surprised' }],
-  ['一本都没背。我只记猜不到的那一点点。', { mood: 'smug', hold: .3 }],
-]);
-const s0T = i => S0LINES[i][0], s0E = i => S0LINES[i][1];
-const S0DUR = seqEnd(S0LINES) + 1.2;
+// 顶层名字一律带本段前缀 S0 / s0（结尾段借用 s0Pile 画同一摞卷子）。
 
-// 前 3.8 秒的节拍（秒）
+// 扉页标题；停留时间由字数算（不数空格）
+const S0TITLE = ['「我是最强的」只值 1 比特', '为什么死记硬背记不住'];
+const S0TITLE_HOLD = .6 + .07 * [...S0TITLE.join('').replace(/\s/g, '')].length;
+// 节拍（秒）
 const S0H = {
   crane: 1.5,                                                            // 镜头从斜看转到正上方
   frame: .05, flour: .3, ring: .2, star: .45, glyph: .72, glyphStep: .07, moon: 1.05, rule: 1.1, title: 1.15, sub: 1.45, glint: 1.62,   // 金墨
   pop: 1.72, snap: 2.08,                                                 // 铜扣：舌片弹出 → 扣带翻到封面上
   open0: 2.08, open1: 2.85,                                              // 封面翻开（镜头同时平移到整本摊开），落下就是扉页和帕秋莉
-  fly0: 2.85, slam: 3.55, roll1: 4.35,                                     // 琪露诺举着纸卷飞进来 → 按下纸带头 → 纸卷往左滚完
 };
+S0H.fade0 = S0H.open1 + S0TITLE_HOLD;  // 标题停够了才开始收（0.3 秒收完）
+S0H.push0 = S0H.fade0 + .25;           // 琪露诺推着卷子进来
+S0H.arrive = S0H.push0 + .95;           // 卷子停在右页中间
+S0H.back0 = S0H.arrive + .25; S0H.back1 = S0H.arrive + .8;   // 琪露诺松手、跳回自己的站位
+const S0LINES = seq(S0H.arrive + .4, [
+  ['帕秋莉！这三百道错题，我要全背下来！我可是最强的！', { who: 'cirno', mood: 'proud' }],
+  ['我这座图书馆有十万本书。你猜，我是怎么记住的？', { mood: 'smug' }],
+  ['……全背下来？', { who: 'cirno', mood: 'surprised' }],
+  ['一本都没背。我只记猜不到的那一点点。', { mood: 'smug', hold: .5 }],
+]);
+const s0T = i => S0LINES[i][0], s0E = i => S0LINES[i][1];
+// s0W：第 i 句里念到 sub 的时刻（按语音时长和字的位置估；没有语音时按默认语速）
+function s0W(i, sub) { const [t0, t1, text] = S0LINES[i], v = voiceOf(text), n = [...text].length, k = [...text.slice(0, Math.max(0, text.indexOf(sub)))].length;
+  return t0 + (v ? v.d : Math.min(t1 - t0, n * .17 + .5)) * k / n; }
+const S0DUR = seqEnd(S0LINES) + 1.2;
 const S0CW = BOOK.w / 2 + 20, S0X0 = CX - 10, S0YM = BOOK.y - 8 + (BOOK.h + 20) / 2;   // 合着的书：宽、书脊那边的 x、竖直中线
 const S0EMB = { x: S0X0 + 468, y: BOOK.y + 380, r: 232 };                              // 封面七曜阵
 const S0GLYPHS = ['日', '月', '火', '水', '木', '金', '土'];
@@ -273,77 +283,65 @@ function s0TitlePage(c, al) { if (al <= 0) return; const R = BOOK.R, x = R.x + R
   c.save(); c.globalAlpha *= al;
   for (const [yy, lw, sd] of [[R.y + 158, 1.8, 2211], [R.y + 166, .9, 2212], [R.y + 236, .9, 2213], [R.y + 244, 1.8, 2214]]) rline(c, [[x - 240, yy], [x + 240, yy]], { w: lw, color: P.ink2, seed: sd, amp: .4 });
   zh(c, '帕秋莉讲座 · 第 3 集', x, R.y + 213, { size: 34, align: 'center', color: P.ink2 });
-  zh(c, '「我是最强的」只值 1 比特', x, R.y + 405, { size: 64, align: 'center', color: P.ink });
-  zh(c, '压缩、大模型和死记硬背', x, R.y + 522, { size: 58, align: 'center', color: P.ink });
+  zh(c, S0TITLE[0], x, R.y + 405, { size: 60, align: 'center', color: P.ink });
+  zh(c, S0TITLE[1], x, R.y + 515, { size: 60, align: 'center', color: P.ink });
   s0Ornament(c, x, R.y + 628);
   zh(c, '红魔馆 · 地下大图书馆 藏', x, R.y + 830, { size: 28, align: 'center', color: P.ink2 });
   c.restore(); }
 
-// ===================== 琪露诺的错题本：一长条打满孔的纸带 =====================
-// 纸带头按在右页右上（x1），纸卷往左滚，纸带朝左摊开（tape 的 rot = π）。格子的比特数是乱的（2–8），孔又密又乱。
-const S0TAPE = { x1: 1790, y: 232, h: 84, rows: 3, unit: 4.6, minW: 10 };
-const S0CELLS = Array.from({ length: 70 }, (_, k) => ({ bits: 2 + Math.floor(hash(k, 71) * 7) }));
-const S0LEN = S0CELLS.reduce((a, q) => a + Math.max(S0TAPE.minW, q.bits * S0TAPE.unit), 0);
-const S0KEEP = [6, 17, 30, 43, 51, 64];   // L3「猜不到的那一点点」：最后还亮着的几格
-const S0ROLL_R0 = 58, S0ROLL_R1 = 13;     // 纸卷满卷、滚完时的半径
-// 其余节拍（都从台词时间推出来）
-const S0K = { shelf0: s0T(1) + .15, shelfOut: s0T(3) + .5, veil0: s0T(3) + 1.5, veil1: s0T(3) + 2.4, out0: s0E(3) - .5, out1: s0E(3) + .05 };
-const s0Unroll = tau => sm(S0H.slam, S0H.roll1, tau, easeOut);
-const s0RollR = p => Math.sqrt(S0ROLL_R1 * S0ROLL_R1 + (S0ROLL_R0 * S0ROLL_R0 - S0ROLL_R1 * S0ROLL_R1) * (1 - p));
-// 纸卷：从上往下看、稍微带一点正面。轴是竖的（和摊开的纸带垂直）；顶面一圈螺旋，侧面露出几排孔。lift 离书页的高度（投影）
-function s0Roll(c, x, y, R, lift = 0) {
-  const h = S0TAPE.h + 6, top = y - h / 2, e = R * .36, col = EP3_TAPE_COL;
-  if (lift > .01) { c.save(); c.fillStyle = `rgba(20,12,10,${.2 * lift})`; c.fill(polyPath(rectPts(x - R + 30 * lift, top + 50 * lift, 2 * R, h + e, R * .4))); c.restore(); }
-  const body = [[x - R, top]]; for (let i = 0; i <= 12; i++) { const a = Math.PI - i / 12 * Math.PI; body.push([x + Math.cos(a) * R, top + h + Math.sin(a) * e]); } body.push([x + R, top]);
-  const path = cutPaper(c, body, col.paper, { seed: 3601, step: 14, blur: 6, sx: 2, sy: 4, grain: .1 });
-  c.save(); c.clip(path);
-  const g = c.createLinearGradient(x - R, 0, x + R, 0); g.addColorStop(0, alpha(col.edge, .75)); g.addColorStop(.35, alpha(col.edge, 0)); g.addColorStop(.7, alpha(col.edge, 0)); g.addColorStop(1, alpha(col.edge, .9));
-  c.fillStyle = g; c.fillRect(x - R, top - e, 2 * R, h + 2 * e);
-  c.fillStyle = alpha(col.hole, .8);
-  for (let k = 0; k < 14; k++) { const u = (hash(k, 81) - .5) * 1.3, px = x + u * R, py = top + 12 + (k % 3) * (h - 18) / 2 + hash(k, 82) * 6, sq = Math.sqrt(Math.max(0, 1 - u * u));
-    if (Math.abs(u) < .95) { c.beginPath(); c.ellipse(px, py, 4.5 * sq + .5, 4.5, 0, 0, TAU); c.fill(); } }
-  c.restore();
-  cutPaper(c, ellPts(x, top, R, e, 32), mix(col.paper, col.edge, .25), { seed: 3602, step: 10, shadow: false, grain: .08 });
-  const sp = []; for (let i = 0; i <= 60; i++) { const a = i / 60 * TAU * Math.max(1.5, R / 12), r = R * (.92 - .72 * i / 60); sp.push([x + Math.cos(a) * r, top + Math.sin(a) * r * .36]); }
-  rline(c, sp, { w: 1.3, color: alpha(col.edge, .95), seed: 3603, amp: .2 });
-  c.fillStyle = alpha(col.hole, .7); c.beginPath(); c.ellipse(x, top, R * .16, R * .06, 0, 0, TAU); c.fill();
-}
-// 纸带、纸卷、尾签；L3 盖一层纸色把孔压淡，只留 S0KEEP 几个孔
-function s0Tape(c, tau) {
-  if (tau < S0H.slam) return;
-  const T = S0TAPE, p = s0Unroll(tau), al = 1 - sm(S0K.out0, S0K.out1, tau); if (al <= 0) return;
-  c.save(); c.globalAlpha *= al; c.translate(0, -18 * sm(S0K.out0, S0K.out1, tau));
-  const r = tape(c, { x: T.x1, y: T.y, rot: Math.PI, cells: S0CELLS, unit: T.unit, minW: T.minW, h: T.h, rows: T.rows, p });
-  const v = sm(S0K.veil0, S0K.veil1, tau);
-  if (v > 0) {
-    c.save(); c.translate(T.x1, T.y); c.rotate(Math.PI); c.fillStyle = alpha(EP3_TAPE_COL.paper, .88 * v); c.fillRect(2, -T.h / 2 + 3, r.len - 4, T.h - 6); c.restore();
-    S0KEEP.forEach((i, j) => { const [kx, ky] = r.at(i), k = sm(S0K.veil0 + .25 + j * .12, S0K.veil0 + .6 + j * .12, tau, easeOutBack);
-      if (k <= 0) return;
-      c.fillStyle = alpha(P.moon, .35 * k); c.beginPath(); c.arc(kx, ky, 15 * k, 0, TAU); c.fill();
-      c.fillStyle = EP3_TAPE_COL.hole; c.beginPath(); c.arc(kx, ky, 7.5 * Math.min(1, k), 0, TAU); c.fill();
-      const tw = tau - (S0K.veil0 + .45 + j * .12); if (tw > 0 && tw < .7) sparkle(c, kx + 12, ky - 30, 16 * Math.sin(tw / .7 * Math.PI), { color: P.moon, rot: .3 + j }); });
-  }
-  // 滚动中的纸卷和身后的几道速度线
-  if (p < 1) { const rx = T.x1 - p * S0LEN, R = s0RollR(p), a = 1 - sm(.7, 1, p);
-    for (let k = 0; k < 3; k++) rline(c, [[rx + R + 26 + k * 18, T.y - 30 + k * 30], [rx + R + 110 + k * 30, T.y - 30 + k * 30]], { w: 3, color: alpha(P.ink, .5 * a), seed: 3610 + k, amp: .3 });
-    s0Roll(c, rx, T.y, R); }
-  // 尾签：纸带头上用线挂一张小签
-  const tg = sm(s0T(0) + .5, s0T(0) + .85, tau, easeOutBack);
-  if (tg > 0) { const tx = 1640, ty = 118;
-    thread(c, [T.x1 - 16, T.y - T.h / 2 + 6], [tx + 118, ty + 4], { sag: 10, p: clamp(tg, 0, 1), seed: 3620 });
-    pop(c, tx + 118, ty, tg, () => spin(c, tx, ty, -.04, () => {
-      cutPaper(c, rectPts(tx - 125, ty - 30, 250, 60, 6), '#f6f2e8', { seed: 3621, step: 20, blur: 5 });
-      zh(c, '错题本 · 300 道', tx, ty + 12, { size: 32, align: 'center', color: P.ink }); })); }
+
+// ===================== 一摞三百张错题卷子 =====================
+// 侧面看的一摞卷子：S0PILE.n 张（一张代表约 9 张），每张左右交替露出一角，角上一个红叉和分数。结尾段也用它（压成卡片）。
+// s0Pile(c, o)：o = { x 底边中心, y 底边, sway 顶上横向晃出多少像素（越往上晃得越多）, white 0..1 褪成白纸（S0KEEP 那几张不褪）,
+//                    glow 0..1 没褪的那几张身后的光, squash 0..1 压扁（露出的角先收掉）, al }
+const S0PILE = { x: 1230, y: 880, w: 290, n: 33, th: 16, tabW: 84, out: 58, tabH: 32 };   // 连露出的角共宽 w + 2·out = 406：x 1027–1433
+const S0SHEETS = Array.from({ length: S0PILE.n }, (_, i) => ({ dx: (hash(i, 51) - .5) * 20, rot: (hash(i, 52) - .5) * .04, side: i % 2 ? 1 : -1,
+  tr: (hash(i, 53) - .5) * .22, score: String(2 + Math.floor(hash(i, 54) * 57)), shade: hash(i, 55) }));
+const S0KEEP = [4, 13, 20, 29];   // L3「猜不到的那一点点」：最后还亮着的几张
+function s0Pile(c, o = {}) {
+  const Pp = S0PILE, { x = Pp.x, y = Pp.y, sway = 0, white = 0, glow = 0, squash = 0, al = 1 } = o; if (al <= .001) return;
+  const th = Pp.th * (1 - .95 * squash), tabs = 1 - sm(0, .5, squash, t => t);
+  c.save(); c.globalAlpha *= al;
+  c.fillStyle = 'rgba(20,12,10,.16)'; c.beginPath(); c.ellipse(x, y + 2, Pp.w * .62, 12, 0, 0, TAU); c.fill();
+  S0SHEETS.forEach((s, i) => {
+    const hk = i / (Pp.n - 1), cx = x + s.dx * (1 - squash) + sway * Math.pow(hk, 1.5), cy = y - (i + .5) * th, keep = S0KEEP.includes(i), wh = keep ? 0 : white;
+    const paper = mix(mix('#f6f2e8', '#ddd2bb', s.shade * .7), '#fcfaf5', wh);
+    c.save(); c.translate(cx, cy); c.rotate(s.rot * (1 - squash) + sway * .0012 * hk);
+    if (tabs > .01) { const sd = s.side, tx = sd * (Pp.w / 2 + Pp.out - Pp.tabW / 2), my = -Pp.tabH / 2 + th / 2;   // 露出来的一角（先画，卷子本身压住它的根）
+      c.save(); c.globalAlpha *= tabs; c.translate(sd * Pp.w / 2, 0); c.rotate(sd * s.tr); c.translate(-sd * Pp.w / 2, 0);
+      if (keep && glow > 0) { c.fillStyle = alpha(P.moon, .45 * Math.min(1, glow)); c.beginPath(); c.arc(sd * (Pp.w / 2 + Pp.out / 2), my, 38 * glow, 0, TAU); c.fill(); }
+      cutPaper(c, rectPts(tx - Pp.tabW / 2, -Pp.tabH + th / 2, Pp.tabW, Pp.tabH, 2), paper, { seed: 3740 + i, step: 22, blur: 3, sx: 1, sy: 2, grain: 0 });
+      const ma = 1 - wh; if (ma > .01) { cross(c, sd * (Pp.w / 2 + 14), my, 18, { seed: 3760 + i, al: ma, amp: .3 });
+        zh(c, s.score, sd * (Pp.w / 2 + 41), my + 1, { size: 21, align: 'center', color: P.red, base: 'middle', al: ma }); }
+      c.restore(); }
+    cutPaper(c, rectPts(-Pp.w / 2, -th / 2, Pp.w, Math.max(1.5, th - 1.5), 2), paper, { seed: 3700 + i, step: 46, shadow: false, grain: 0 });
+    c.restore(); });
   c.restore();
 }
-// 「哗——」：纸卷滚过去时书页中间一个手写的拟声字
-function s0Whoosh(c, tau) { const u = tau - S0H.slam; if (u < 0 || u > 1.2) return;
-  const k = sm(.05, .2, u, easeOutBack), a = 1 - sm(.85, 1.2, u);
-  fade(c, a, () => spin(c, 1180, 350, -.08, () => pop(c, 1180, 350, k, () => zh(c, '哗——', 1180, 372, { size: 70, align: 'center', color: P.ink, weight: 500 })))); }
-const s0SlamJolt = tau => { const u = tau - S0H.slam; return u > 0 && u < .3 ? Math.sin(u / .3 * Math.PI * 3) * 4 * (1 - u / .3) : 0; };
+// 其余节拍（都从台词和语音进度推出来）
+const S0K = { shelf0: s0W(1, '十万'), shelfOut: s0W(3, '一本') + .2, white0: s0W(3, '猜不到'), step0: s0W(3, '我只记') - .2, pr: s0W(0, '我可是'),
+  out0: s0E(3) - .5, out1: s0E(3) + .05 };
+// 卷子的位置：push0 → arrive 从画面右外滑到 S0PILE.x（减速停下）
+const s0PileX = tau => lerp(2200, S0PILE.x, sm(S0H.push0, S0H.arrive, tau, t => 1 - (1 - t) * (1 - t)));
+// 摇摇晃晃：推的时候顶上往后拖，停下时往前甩再来回晃；琪露诺蹦起来时再晃一下；平时轻轻晃
+function s0Sway(tau) { const kick = (t0, A, w = 7, d = 2.2) => { const u = tau - t0; return u > 0 ? A * Math.sin(u * w) * Math.exp(-u * d) : 0; };
+  return 18 * sm(S0H.push0, S0H.push0 + .3, tau) * (1 - sm(S0H.arrive - .05, S0H.arrive + .12, tau)) + kick(S0H.arrive, -46) + kick(S0K.pr + .45, 26) + Math.sin(tau * 1.7) * 3; }
+function s0Papers(c, tau) {
+  if (tau < S0H.push0) return;
+  const al = 1 - sm(S0K.out0, S0K.out1, tau); if (al <= 0) return;
+  const white = sm(S0K.white0, S0K.white0 + .9, tau), glow = sm(S0K.white0 + .5, S0K.white0 + 1, tau, easeOutBack), sw = s0Sway(tau);
+  c.save(); c.translate(0, -18 * sm(S0K.out0, S0K.out1, tau));
+  s0Pile(c, { x: s0PileX(tau), sway: sw, white, glow, al });
+  // 剩下那几张冒一下星
+  S0KEEP.forEach((i, j) => { const tw = tau - (S0K.white0 + .6 + j * .12); if (tw <= 0 || tw >= .7) return; const s = S0SHEETS[i], hk = i / (S0PILE.n - 1);
+    sparkle(c, S0PILE.x + s.side * (S0PILE.w / 2 + S0PILE.out) + sw * Math.pow(hk, 1.5), S0PILE.y - (i + .5) * S0PILE.th - 26, 15 * Math.sin(tw / .7 * Math.PI), { color: P.moon, rot: .3 + j }); });
+  c.restore();
+}
+// 卷子停下那一下，书页一震
+const s0SlamJolt = tau => { const u = tau - S0H.arrive; return u > 0 && u < .3 ? Math.sin(u / .3 * Math.PI * 3) * 3 * (1 - u / .3) : 0; };
 
 // ===================== 书架剪影（十万本书） =====================
-// 左页上三层书架，一层一个 Path2D（淡墨剪影，不描边），L1 一层层立起来，L3「一本都没背」时淡掉
+// 左页上三层书架，一层一个 Path2D（淡墨剪影，不描边），L1 一层层立起来，L3「一本都没背」时淡掉。帕秋莉身后的背景，不算道具
 const S0SHELF = (() => { const rows = [505, 690, 875], x0 = 100, x1 = 900;
   return rows.map((yb, j) => { const p = new Path2D(); let x = x0 + 6, k = 0;
     p.rect(x0 - 8, yb, x1 - x0 + 16, 9);                                  // 隔板
@@ -369,42 +367,41 @@ function s0Flake(c, x, y, r, rot, a, color = EP2_ICE_DEEP) { if (a <= 0 || r <= 
   c.stroke(); c.restore(); }
 // 帕秋莉翻开书之前的样子：站在左页上歪头看书（封面内侧翻下来时就画在上面）
 function s0PchIdle(c, tau) { drawPatchouli(c, { ...EP3.pch, pose: 'stand', mood: 'normal', look: .7, tilt: .05, mouth: 0, blink: blinkAt(tau), t: tau }); }
-// 帕秋莉：纸带拍下来吓一跳 → 抬头看纸带 → L1 讲图书馆、回头看书架再转向琪露诺 → L2/L3 抱臂 → 「猜不到的那一点点」指纸带
+// 帕秋莉：卷子停下吓一跳 → 抬头看卷子 → L1 讲图书馆、回头看书架再转向琪露诺 → L2 抱臂 → 「我只记」往前一步指着卷子 → 退回站位
+const S0PCH_STEP = 410;
 function s0Patchouli(c, tau, L) {
-  if (tau < S0H.slam) { s0PchIdle(c, tau); return; }
+  if (tau < S0H.arrive) { s0PchIdle(c, tau); return; }
   const T = s0T, E = EP3.pch, mouth = mouthOf(L, 'patchouli'), blink = blinkAt(tau);
   if (tau >= S0K.out1) { drawPatchouli(c, { ...E, pose: 'lecture', mood: 'normal', mouth: 0, blink, t: tau }); return; }   // 交接帧
-  let pose = 'stand', mood = 'normal', look = .7, gesture, hop = 0, tilt = 0;
-  if (tau < T(0)) { mood = 'surprised'; hop = Math.sin(clamp((tau - S0H.slam) / .32, 0, 1) * Math.PI) * 22; look = .9; }
+  let pose = 'stand', mood = 'normal', look = .7, gesture, tilt = 0;
+  const st = sm(S0K.step0, S0K.step0 + .45, tau, easeIO) * (1 - sm(S0K.out0 - .1, S0K.out1 - .05, tau, easeIO)), x = lerp(E.x, S0PCH_STEP, st);
+  let hop = Math.abs(Math.sin(st * Math.PI)) * 16;
+  if (tau < T(0)) { mood = 'surprised'; hop += Math.sin(clamp((tau - S0H.arrive) / .32, 0, 1) * Math.PI) * 22; look = .9; }
   else if (tau < T(1)) { mood = 'annoyed'; look = .9; tilt = -.08; }
   else if (tau < T(2)) { const lt = tau - T(1); pose = 'lecture'; mood = moodOf(L, 'patchouli', 'smug'); gesture = lt < 2.2 ? .95 : .5; look = lt < 2.3 ? -.5 : .8; }
-  else if (tau < S0K.veil0 - .3) { pose = 'cross'; mood = 'smug'; look = -.3; }
+  else if (tau < S0K.step0) { pose = 'cross'; mood = 'smug'; look = -.3; }
   else if (tau < S0K.out0) { pose = 'point'; mood = moodOf(L, 'patchouli', 'smug'); look = .5; tilt = -.1; }
   else { pose = 'lecture'; mood = 'normal'; look = .3; }
-  drawPatchouli(c, { ...E, y: E.y - hop, pose, mood, look, gesture, tilt, mouth, blink, t: tau });
+  drawPatchouli(c, { ...E, x, y: E.y - hop, pose, mood, look, gesture, tilt, mouth, blink, t: tau });
 }
-// 琪露诺举着纸卷飞进来：纸卷中心 = hold 姿势「纸的中心」，在脚底上方 419 像素（h = 440 时）
-const S0CIR_DY = 419, S0STEP = 1470;   // L2 往前走一步到 x = 1470
-function s0Carry(tau) { const u = sm(S0H.fly0, S0H.slam, tau, t => t * (.6 + .4 * t));
-  return { x: lerp(2080, S0TAPE.x1, u), y: lerp(60, S0TAPE.y, u) - Math.sin(u * Math.PI) * 50, lift: 1 - u }; }
+// 琪露诺：推着卷子进来（双手推在右边露出的卷角上：throw 姿势 gesture 1、朝左时，手在脚底左边 115 像素）→ 松手跳回站位
+const S0PUSH_DX = S0PILE.w / 2 + S0PILE.out + 115 - 8;
 function s0Cirno(c, tau, L) {
-  if (tau < S0H.fly0) return;
+  if (tau < S0H.push0) return;
   const E = EP3.cir, T = s0T, mouth = mouthOf(L, 'cirno'), blink = blinkAt(tau, 2);
   if (tau >= S0K.out1) { drawCirno(c, { ...E, pose: 'stand', mood: 'normal', mouth: 0, blink, t: tau }); return; }   // 交接帧
-  if (tau < S0H.slam) { const p = s0Carry(tau); s0Roll(c, p.x, p.y, S0ROLL_R0, p.lift);
-    drawCirno(c, { x: p.x, y: p.y + S0CIR_DY, h: E.h, facing: -1, pose: 'hold', mood: 'happy', mouth: 0, blink: 0, tilt: -.1, t: tau }); return; }
-  // 按下纸带头后落回自己的站位；L2 往前走一步，L3 结束时走回去
-  const f = sm(S0H.slam + .05, S0H.slam + .6, tau, easeIO), st = sm(T(2) - .1, T(2) + .5, tau, easeIO) * (1 - sm(S0K.out0, S0K.out1, tau, easeIO));
-  let x = lerp(lerp(S0TAPE.x1, E.x, f), S0STEP, st), y = lerp(S0TAPE.y + S0CIR_DY, E.y, f) - Math.sin(f * Math.PI) * 60 - Math.abs(Math.sin(st * Math.PI * 2)) * 14;
-  let pose = f < .9 ? 'fly' : 'stand', mood = 'happy', gesture, look = 0, tilt = 0;
-  const pr = s0E(0) - 1.9;   // 「我可是最强的」
-  if (f >= .9) {
-    if (tau < T(0)) mood = 'happy';
-    else if (tau < pr) { pose = 'point'; gesture = sm(T(0), T(0) + .3, tau, easeOutBack); look = .3; mood = 'happy'; }
+  if (tau < S0H.back0) { const u = sm(S0H.push0, S0H.arrive, tau, t => t);   // 推：一步一顿
+    drawCirno(c, { x: s0PileX(tau) + S0PUSH_DX, y: E.y - Math.abs(Math.sin(u * Math.PI * 4)) * 10, h: E.h, facing: -1, pose: 'throw', gesture: 1, mood: tau < S0H.arrive ? 'pout' : 'happy', mouth, blink: 0, tilt: -.06, t: tau }); return; }
+  const f = sm(S0H.back0, S0H.back1, tau, easeIO);
+  let x = lerp(S0PILE.x + S0PUSH_DX, E.x, f), y = E.y - Math.sin(f * Math.PI) * 50;
+  let pose = 'stand', mood = 'happy', gesture, look = 0, tilt = 0;
+  const pr = S0K.pr;   // 「我可是最强的」
+  if (f >= .98) {
+    if (tau < pr) { pose = 'point'; gesture = sm(T(0), T(0) + .3, tau, easeOutBack); look = .3; }
     else if (tau < T(1)) { pose = 'proud'; mood = 'proud'; gesture = sm(pr, pr + .3, tau, easeOutBack); y -= Math.abs(Math.sin(clamp((tau - pr - .1) / .5, 0, 1) * Math.PI)) * 34; }
     else if (tau < T(2)) { mood = 'normal'; look = .4; }
     else if (tau < T(3)) { pose = 'think'; mood = tau - T(2) < .4 ? 'normal' : 'confused'; tilt = .1; }
-    else { mood = tau < S0K.veil0 ? 'surprised' : 'normal'; look = .3; }
+    else { mood = tau < S0K.white0 ? 'surprised' : 'normal'; look = .3; }
   }
   const r = drawCirno(c, { x, y, h: E.h, facing: E.facing, pose, mood, mouth, blink, t: tau, gesture, look, tilt });
   if (tau >= pr && tau < pr + 1.2 && r && r.hands) { const lt = tau - pr - .25, [hx, hy] = r.hands.reduce((a, b) => b[1] < a[1] ? b : a);
@@ -417,13 +414,12 @@ scene({ order: 0, key: 'opening', title: '开场', dur: S0DUR, lines: S0LINES, n
     if (tau < S0H.open1) { s0Opening(c, tau); return; }
     c.save(); c.translate(0, s0SlamJolt(tau));
     spread(c, tau);
-    // 扉页（纸卷滚过去时收掉）
-    const tA = 1 - sm(S0H.slam + .1, S0H.slam + .6, tau);
+    // 扉页：标题完整停留 S0TITLE_HOLD 秒，卷子进来时收掉
+    const tA = 1 - sm(S0H.fade0, S0H.fade0 + .3, tau);
     if (tA > 0) { s0Frontis(c, tau, tA); s0TitlePage(c, tA); }
     s0Shelves(c, tau);
     s0Patchouli(c, tau, L);
-    s0Tape(c, tau);
+    s0Papers(c, tau);
     s0Cirno(c, tau, L);
-    s0Whoosh(c, tau);
     c.restore();
   } });
