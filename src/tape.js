@@ -145,9 +145,9 @@ function tape(c, o = {}) {
   // 惊讶火花那一格：压暗的红晕（中间浓、四周淡）
   cells.forEach((q, i) => {
     if (!q.hot) return; const l = xs[i] - ws[i] / 2; if (l > edgeR) return;
-    const g = c.createRadialGradient(xs[i], 0, 0, xs[i], 0, Math.max(ws[i], h) * .75);
-    g.addColorStop(0, alpha(P.red, .32 * q.hot)); g.addColorStop(.6, alpha(P.red, .16 * q.hot)); g.addColorStop(1, alpha(P.red, 0));
-    c.fillStyle = g; c.fillRect(l - 14, -h / 2 + 1, ws[i] + 28, h - 2);
+    const R = ws[i] / 2 + h * .45, g = c.createRadialGradient(xs[i], 0, 0, xs[i], 0, R);
+    g.addColorStop(0, alpha(P.red, .3 * q.hot)); g.addColorStop(.55, alpha(P.red, .2 * q.hot)); g.addColorStop(1, alpha(P.red, 0));
+    c.fillStyle = g; c.fillRect(xs[i] - R, -h / 2 + 1, R * 2, h - 2);
   });
   // 正在打孔的那一格：逐孔打出，孔撑开时带一点回弹，打下来的圆纸屑翻着落下
   if (done < cells.length && nP > done) {
@@ -156,7 +156,7 @@ function tape(c, o = {}) {
   }
   c.restore();
   // 纸屑：刚打完的孔掉出一片小圆纸，下落约 1.2 格的打孔进度（画在纸带外面，不裁剪）
-  for (let i = Math.max(0, done - 1); i <= Math.min(cells.length - 1, done); i++) {
+  if (punch < 1) for (let i = Math.max(0, done - 1); i <= Math.min(cells.length - 1, done); i++) {
     const l = xs[i] - ws[i] / 2; if (l > edgeR) continue;
     const holes = tapeHoles(cells[i].bits || 0, ws[i], h, rows);
     holes.forEach((q, k) => {
@@ -182,11 +182,11 @@ function tapeRoll(c, x0, R, h, rolled, seed) {
   c.fillStyle = 'rgba(30,20,35,.16)'; c.beginPath(); c.ellipse(cx + 3, bot + 2, R + 2, ry * .9, 0, 0, TAU); c.fill(); c.fillRect(cx - R + 3, top + 4, R * 2, h);
   // 柱身：三道竖向的明暗（剪纸式分块，不做渐变）
   const body = new Path2D(); body.moveTo(cx - R, top); body.lineTo(cx - R, bot); body.ellipse(cx, bot, R, ry, 0, Math.PI, 0, true); body.lineTo(cx + R, top); body.closePath();
-  c.fillStyle = mix(paper, '#5a4a3a', .08); c.fill(body);
+  c.fillStyle = mix(paper, '#5a4a3a', .1); c.fill(body);
   c.save(); c.clip(body);
-  c.fillStyle = 'rgba(255,252,240,.35)'; c.fillRect(cx - R * .72, top, R * .5, h + ry + 2);
-  c.fillStyle = 'rgba(60,40,24,.14)'; c.fillRect(cx + R * .35, top, R * .7, h + ry + 2);
-  c.fillStyle = 'rgba(60,40,24,.12)'; c.fillRect(cx + R * .75, top, R * .3, h + ry + 2);
+  c.fillStyle = 'rgba(255,252,240,.45)'; c.fillRect(cx - R * .75, top, R * .5, h + ry + 2);
+  c.fillStyle = 'rgba(60,40,24,.16)'; c.fillRect(cx + R * .3, top, R * .75, h + ry + 2);
+  c.fillStyle = 'rgba(60,40,24,.16)'; c.fillRect(cx + R * .72, top, R * .35, h + ry + 2);
   // 卷在外圈的导孔：沿柱身压扁成一排短痕
   c.fillStyle = alpha(EP3_TAPE_COL.hole, .5);
   for (let k = -3; k <= 3; k++) { const xx = cx + Math.sin(k * .42 + rolled * .05) * R * .85, s = Math.cos(k * .42) * 1.6; if (s > .3) for (const yy of [top + 4.8, bot - 4.8]) c.fillRect(xx - s / 2, yy - 1.6, s, 3.2); }
