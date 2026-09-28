@@ -16,7 +16,7 @@ const S2LINES = seq(1.0, [
   ['你来找我，一半的时候是说「我是最强的」。', { pause: .2, hold: .8 }],
   ['我只要问一次「是这句吗」，一半的时候就猜中了。这叫 1 比特。', { pause: .3, hold: 1.4 }],
   ['少见的话，要多问几次。八分之一的话，要问三次：3 比特。', { pause: .3, hold: 1.6 }],
-  ['越难猜，比特越多。', { pause: .8, hold: 1.5 }],
+  ['越难猜，比特越多。', { pause: .3, hold: 1.6 }],
   ['常说的话用短暗号，少说的用长暗号，平均下来最省。', { pause: .3, hold: 1.6 }],
   ['省到不能再省的那个数，香农叫它「熵」。', { pause: .6, hold: 1.6 }],
   ['所以「我是最强的」……只值 1 比特？', { who: 'cirno', mood: 'surprised', pause: .3, hold: .5 }],
@@ -57,7 +57,7 @@ const S2B = (() => { const t = S2T, e = S2E, k = S2K, B = {};
   B.mid = k(1, '一半'); B.say = k(1, '我是最强的');
   B.f1 = k(2, '问一次'); B.cut1 = k(2, '一半的时候'); B.bit1 = k(2, '1 比特'); B.tear1 = B.bit1 + 1.0;
   B.q1 = k(3, '少见') + .1; B.f2 = k(3, '多问几次'); B.f3 = k(3, '八分之一'); B.cut3 = k(3, '要问三次'); B.bit3 = k(3, '3 比特'); B.lw = B.bit3 + .7;
-  B.pair = t(4) - .7;                                                  // 第 5 句：两张纸片并排
+  B.pair = t(4);                                                  // 第 5 句：两张纸片并排
   B.row = t(5) - .1; B.more = k(5, '少说的'); B.sq = k(5, '平均下来');
   B.join = t(6) + .05; B.ent = k(6, '熵'); B.seal = B.ent + .4;
   B.pick = k(7, '我是最强的'); B.back = [e(8) - .1, e(8) + .9]; B.egg = [e(8) + .9, e(8) + 1.9];
@@ -290,7 +290,9 @@ function s2Draw(c, tau, L) {
   if (px < W) { c.save(); c.translate(-px, 0);
     spread(c, tau); pageHeader(c, '第二页 · 比特', tau, .9); s2Egg(c, tau);
     c.restore(); }
-  if (px > 0) { c.save(); c.translate(S2PAN - px, 0); s2Desk(c, tau); s2Tapes(c, tau); c.restore(); }
+  // 回书页前先把桌上的东西收掉（淡出），免得镜头回移时纸片从琪露诺身上滑过
+  const out = 1 - sm(B.back[0] - .45, B.back[0] + .05, tau);
+  if (px > 0 && out > 0) { c.save(); c.globalAlpha *= out; c.translate(S2PAN - px, 0); s2Desk(c, tau); s2Tapes(c, tau); c.restore(); }
   s2Cast(c, tau, L, dk);
 }
 
