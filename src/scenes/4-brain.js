@@ -1,7 +1,7 @@
 'use strict';
 // 第 4 段：人脑也在压缩（第三稿，从第二稿 4-brain.js 拆出来重排）。段首、段末各 0.8 秒是标准画面（spread + 页眉 + 两人在 EP3 站位）。
-// 站位区（穿模）：帕秋莉 x≤420（下棋时退到 x=260，包围框 135–385），琪露诺 x≥1520（下棋时退到 1690，包围框 1536–1844）；
-//   道具只放在 x 420–1500 之间：冰格在上方 y 160–300，两盘棋 y 390–700，计数排 y 740–840，卡片 x 520–1410。
+// 站位区（穿模）：帕秋莉 x≤420（下棋时退到 x=260，包围框 135–385），琪露诺 x≥1520（下棋时退到 1650，包围框 1496–1804）；
+//   道具只放在 x 420–1470 之间：冰格在上方 y 160–300，两盘棋 y 390–700，计数排 y 740–840，卡片 x 520–1410。
 //   人物走位先于道具出现（L4 前的停顿里让开），道具收掉以后再走回来。飞行物都在 y<440 的上方或道具区里走，不穿人。
 //   L1 琪露诺：那我的脑子呢？（歪头想）
 //   L2 头顶上方浮出四个冰格；琪露诺变出四颗小冰珠一颗颗落进去，第五颗撞到满格弹飞
@@ -90,7 +90,7 @@ function s4Block(c, x, y, s, al = 1, form = 1) {
     s4IceFace(c, [[x + h, y - h], [x + h + d, y - h - d], [x + h + d, y + h - d], [x + h, y + h]], EP2_ICE_DEEP, .9);
     s4IceFace(c, rectPts(x - h, y - h, s, s), EP2_ICE, .92); c.restore(); }
   const g = sm(0, .6, form);
-  for (let i = 0; i < 12; i++) { const bx = x - h + s * (.18 + (i % 4) * .215), by = y - h + s * (.24 + Math.floor(i / 4) * .26) + (i % 2) * s * .04, a = hash(i, 4401) * TAU, R = s * .9 * (1 - g);
+  for (let i = 0; i < 12; i++) { const bx = x - h + s * (.18 + (i % 4) * .215), by = y - h + s * (.24 + Math.floor(i / 4) * .26) + (i % 2) * s * .04, a = hash(i, 4401) * TAU, R = s * .4 * (1 - g);
     s4Bead(c, bx + Math.cos(a) * R, by + Math.sin(a) * R * .6, s * .075, .9 * sm(0, .2, form)); }
   if (ice > 0) { c.save(); c.globalAlpha *= ice; s4IceFace(c, rectPts(x - h, y - h, s, s), EP2_FROST, .18);
     c.strokeStyle = alpha('#ffffff', .9); c.lineWidth = 2; c.stroke(polyPath(rectPts(x - h, y - h, s, s))); c.restore(); }
@@ -99,7 +99,7 @@ function s4Block(c, x, y, s, al = 1, form = 1) {
 
 // ===================== 冰棋盘（斜看） =====================
 const S4F = 1600, S4PS = .8, S4FY = .52;
-const S4BD = { L: { x: 640, y: 560, q: 46, id: 'L' }, R: { x: 1280, y: 560, q: 46, id: 'R' } };
+const S4BD = { L: { x: 640, y: 560, q: 46, id: 'L' }, R: { x: 1250, y: 560, q: 46, id: 'R' } };
 // 棋盘坐标 (u, v)：u 0..8 从 a 列到 h 列，v 0..8 从远（第 8 行）到近（第 1 行）；h 是离开盘面的高度
 function s4Pt(B, u, v, h = 0) { const X = (u - 4) * B.q, Z = (v - 4) * B.q, k = S4F / (S4F - Z * S4PS); return [B.x + X * k, B.y + Z * S4FY * k - h * k, k]; }
 const s4Sq = (f, r) => [f + .5, 8 - r + .5];   // f 0..7，r 1..8 → 格子中心的 (u, v)
@@ -259,7 +259,7 @@ function s4Stacks(c, o = {}) {
 }
 
 // ===================== 两人走位 =====================
-const S4PX = 260, S4CX = 1690;   // 下棋时两人退到的位置
+const S4PX = 260, S4CX = 1650;   // 下棋时两人退到的位置
 function s4Cast(c, tau, L) {
   const B = S4B, T = S4T, w = S4W;
   const pK = [[B.step[0], EP3.pch.x], [B.step[1], S4PX], [B.back[0], S4PX], [B.back[1], EP3.pch.x]];
@@ -349,7 +349,7 @@ function s4Draw(c, tau, L) {
   if (rIn > .5 && !rShat) s4Frost(c, S4BD.R, rFrost);
 
   // 蜡封（实验）：盖在左盘右上角，跟着左盘走
-  seal(c, 880, 410, 'exp', { k: sm(B.seal, B.seal + .55, tau, t => t), r: 24, al: lA * lIn, label: 'Chase & Simon 1973' });
+  seal(c, 880, 410, 'exp', { k: sm(B.seal, B.seal + .55, tau, t => t), r: 24, al: lA * lIn, label: 'Chase & Simon 1973', labelSize: 19 });
   // 盘下「大师 / 新手」
   const tOff = 1 - sm(B.tallyOff[0], B.tallyOff[1], tau), tl = lOut * lDim * tOff, tr = rDim * tOff;
   if (tau >= B.master[0] - .1) s4Tally(c, S4BD.L, tau, [['大师', S4NGROUP, B.master[0], B.master[1], [4, 9, 13], tl], ['新手', 4, B.novice[0], B.novice[1], null, tl]]);
@@ -405,7 +405,7 @@ function s4Draw(c, tau, L) {
       else if (u >= 1 && v < 1) s4Bead(c, xs[3] + 90 + 90 * v, cy - 30 - 80 * v + 600 * v * v, 24, 1 - v);
       if (u >= 1 && v < .3) sparkle(c, xs[3] + 70, cy - 40, 22 * (1 - v / .3), { color: '#ffffff' }); }
     // 大冰块：在琪露诺和冰格之间的空中冻成，缩小落进第一格
-    const bf = sm(B.blockForm[0], B.blockForm[1], tau, t => t), bu = sm(B.block[0], B.block[1], tau), bx0 = 1290, by0 = 360;
+    const bf = sm(B.blockForm[0], B.blockForm[1], tau, t => t), bu = sm(B.block[0], B.block[1], tau), bx0 = 1250, by0 = 360;
     if (bf > 0 && bu < 1) s4Block(c, lerp(bx0, xs[0], bu), lerp(by0, cy + 4, bu) - Math.sin(bu * Math.PI) * 90, cs * lerp(1.8, .84, easeIO(bu)), 1, bf);
     if (bu >= 1 && tau < B.block[1] + .5) sparkle(c, xs[0] + 40, cy - 50, 26 * (1 - sm(B.block[1], B.block[1] + .5, tau)), { color: '#ffffff' });
     // L6：组块整块从左盘飞进冰格
