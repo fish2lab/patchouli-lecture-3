@@ -2,7 +2,7 @@
 
 ## 这个仓库做什么
 
-「帕秋莉讲座」系列科普动画第 3 集《「我是最强的」只值 1 比特：用信息论看人脑和大模型》（分支 `ep3-compression`，从第 2 集 fish2lab/patchouli-lecture-2 克隆，引擎、画具、两个剪纸角色沿用）。目的、台词和取舍在 `docs/方案.md`，工作包和接口在 `docs/施工.md`。知识来源是作者的《精准学习》划线导出（本机 `../1/refs/`，不进公开仓库）加信息论和大模型文献（出处表在 `docs/方案.md`）；比特数由 `tools/bits/` 用本机开源小模型实测，数据在 `data/bits/`。
+「帕秋莉讲座」系列科普动画第 3 集《「我是最强的」只值 1 比特：用信息论看人脑和大模型》（公开仓库 fish2lab/patchouli-lecture-3，在线看 https://fish2lab.github.io/patchouli-lecture-3/ ；从第 2 集 fish2lab/patchouli-lecture-2 克隆，引擎、画具、两个剪纸角色沿用）。目的、台词和取舍在 `docs/方案.md`，工作包和接口在 `docs/施工.md`。知识来源是作者的《精准学习》划线导出（本机 `../1/refs/`，不进公开仓库）加信息论和大模型文献（出处表在 `docs/方案.md`）；比特数由 `tools/bits/` 用本机开源小模型实测，数据在 `data/bits/`。
 
 ## 测试和 CI：不要过度
 
