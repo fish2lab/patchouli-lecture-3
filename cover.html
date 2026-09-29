@@ -19,42 +19,51 @@ canvas { display: block; max-width: 100%; margin: 0 auto; }
 <script src="src/character/cirno.js"></script>
 <script src="src/props.js"></script>
 <script src="src/tape.js"></script>
-<script src="src/scenes/0-opening.js"></script>
 <script>
 'use strict';
-// 第 3 集封面：深紫夜色底；左边一摞比琪露诺还高的错题卷子，绝大多数已经褪成白纸，只剩几张红叉的亮着（开场最后那个画面）；
-// 琪露诺在卷子旁边得意地握拳。右边就是片名：大字「「我是最强的」/ 只值 1 比特」，下面副标题「用信息论看人脑和大模型」和系列名；
-// 帕秋莉从右下角探头（放大，占右下一角）。
+// 第 3 集封面（缩略图优先：缩到 480 宽也要认得出卷子、看得清标题）。
+// 左半边：琪露诺把一张大卷子举过头顶（红笔大分数、一列红叉），身后斜插两张同样的卷子，旁边一张「错题 300 道」小签。
+// 右半边：片名两行大字「「我是最强的」/ 只值 1 比特」，下面副标题「用信息论看人脑和大模型」和系列名，整块上下居中；
+// 帕秋莉从右下角探头，ジト目看着琪露诺。
 const CV_T = 2.4;
 const CV_BG = '#2f2833', CV_CREAM = '#ece5d6', CV_CREAM2 = '#b9b0bd', CV_RED = '#e0a39e';
 const CV_LAYOUT = {
-  169: { w: 1920, pile: { x: 800, y: 1000, s: 1.4 }, cir: { x: 215, y: 1000, h: 620 },
-    head: { x: 1460, y: 300, max: 820, size: 116, lines: ['「我是最强的」', '只值 1 比特'], gap: 145 }, sub: { x: 1460, y: 560, size: 58 },
-    series: { x: 1460, y: 650, size: 34 }, pch: { x: 1700, y: 1062, h: 620 } },
-  43: { w: 1440, pile: { x: 560, y: 1010, s: 1.2 }, cir: { x: 150, y: 1010, h: 520 },
-    head: { x: 1100, y: 290, max: 560, size: 92, lines: ['「我是最强的」', '只值 1 比特'], gap: 118 }, sub: { x: 1100, y: 520, size: 40 },
-    series: { x: 1100, y: 595, size: 30 }, pch: { x: 1250, y: 1062, h: 520 } },
+  169: { w: 1920, cir: { x: 470, y: 1075, h: 700 }, paper: { s: .78 }, tag: { x: 70, y: 720 },
+    head: { x: 1330, y: 385, max: 900, size: 132, lines: ['「我是最强的」', '只值 1 比特'], gap: 175, size2: 160 }, sub: { x: 1330, y: 695, size: 58 },
+    series: { x: 1330, y: 780, size: 36 }, pch: { x: 1760, y: 1066, h: 760 } },
+  43: { w: 1440, cir: { x: 330, y: 1075, h: 620 }, paper: { s: .7 }, tag: { x: 20, y: 860, s: .8 },
+    head: { x: 1010, y: 400, max: 720, size: 104, lines: ['「我是最强的」', '只值 1 比特'], gap: 140, size2: 124 }, sub: { x: 1010, y: 650, size: 44 },
+    series: { x: 1010, y: 720, size: 30 }, pch: { x: 1310, y: 1066, h: 640 } },
 };
 
 function cvBg(c, w) {
   c.fillStyle = CV_BG; c.fillRect(0, 0, w, H);
   grain(c, polyPath(rectPts(0, 0, w, H)), .1);
-  const v = c.createRadialGradient(w * .35, H * .55, H * .2, w / 2, H / 2, w * .8); v.addColorStop(0, 'rgba(255,230,190,.07)'); v.addColorStop(1, 'rgba(8,4,12,.45)');
+  const v = c.createRadialGradient(w * .3, H * .45, H * .15, w / 2, H / 2, w * .8); v.addColorStop(0, 'rgba(255,230,190,.08)'); v.addColorStop(1, 'rgba(8,4,12,.45)');
   c.fillStyle = v; c.fillRect(0, 0, w, H);
 }
 
 function cvDraw(c, L) {
   const w = L.w;
   cvBg(c, w);
-  // 一摞卷子（开场的 s0Pile，按封面放大）：大多褪白，四张亮着
-  const pl = L.pile;
-  c.save(); c.translate(pl.x, pl.y); c.scale(pl.s, pl.s); c.translate(-S0PILE.x, -S0PILE.y);
-  s0Pile(c, { sway: 10, white: .9, glow: 1 });
+  // 琪露诺举卷子：先用空画布取锚点，卷子画在她身后，再画她
+  const cp = { x: L.cir.x, y: L.cir.y, h: L.cir.h, pose: 'hold', mood: 'proud', facing: 1, t: CV_T, blink: 0, mouth: .5, gesture: .6 };
+  const an = drawCirno(document.createElement('canvas').getContext('2d'), cp), hy = (an.hands[0][1] + an.hands[1][1]) / 2, s = L.paper.s;
+  const px = an.hold[0], py = hy + 40 - EP2.exam.h * s / 2;
+  [[-150, 40, -.2, 17, 3311], [150, 30, .18, 23, 3321]].forEach(([dx, dy, r, sc, seed]) => {   // 身后斜插的两张
+    c.save(); c.translate(px + dx, py + dy); c.scale(s * .92, s * .92); examPaper(c, { x: 0, y: 0, rot: r, score: sc, seed }); c.restore(); });
+  c.save(); c.translate(px, py); c.scale(s, s); examPaper(c, { x: 0, y: 0, rot: -.04, score: 12, seed: 3301 }); c.restore();
+  drawCirno(c, cp);
+  // 「错题 300 道」小签：一张斜贴的纸条
+  const tg = L.tag;
+  c.save(); c.translate(tg.x + 120, tg.y); c.rotate(-.08); c.scale(tg.s || 1, tg.s || 1);
+  cutPaper(c, rectPts(-150, -46, 300, 92, 6), '#f3e6d6', { seed: 3390, step: 20, blur: 8, sy: 4 });
+  zh(c, '错题 300 道', 0, 16, { size: 46, align: 'center', color: P.red });
   c.restore();
-  drawCirno(c, { x: L.cir.x, y: L.cir.y, h: L.cir.h, pose: 'proud', mood: 'proud', facing: 1, t: CV_T, blink: 0, mouth: 0, gesture: .8 });
-  // 字：主标题就是片名（两行大字 + 副标题），再是系列名
-  const hd = L.head, hs = Math.min(hd.size, hd.max / Math.max(...hd.lines.map(s => zhWidth(c, s, 100))) * 100);
-  hd.lines.forEach((ln, i) => zh(c, ln, hd.x, hd.y + i * hd.gap, { size: hs, align: 'center', color: i ? CV_RED : CV_CREAM, outline: i ? CV_RED : CV_CREAM, ow: hs * .04 }));
+  // 片名
+  const hd = L.head;
+  zh(c, hd.lines[0], hd.x, hd.y, { size: hd.size, align: 'center', color: CV_CREAM, outline: CV_CREAM, ow: hd.size * .04 });
+  zh(c, hd.lines[1], hd.x, hd.y + hd.gap, { size: hd.size2, align: 'center', color: CV_RED, outline: CV_RED, ow: hd.size2 * .04 });
   zh(c, '用信息论看人脑和大模型', L.sub.x, L.sub.y, { size: L.sub.size, align: 'center', color: CV_CREAM });
   zh(c, '帕秋莉讲座 · 第 3 集', L.series.x, L.series.y, { size: L.series.size, align: 'center', color: CV_CREAM2 });
   drawPatchouli(c, { x: L.pch.x, y: L.pch.y, h: L.pch.h, pose: 'peek', mood: 'normal', facing: -1, look: .8, t: CV_T, blink: 0, mouth: 0 });
