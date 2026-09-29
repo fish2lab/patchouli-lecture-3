@@ -18,7 +18,7 @@
 // 顶层名字一律带本段前缀 S0 / s0（结尾段借用 s0Pile 画同一摞卷子）。
 
 // 扉页标题；停留时间由字数算（不数空格）
-const S0TITLE = ['「我是最强的」只值 1 比特', '为什么死记硬背记不住'];
+const S0TITLE = ['「我是最强的」只值 1 比特', '用信息论看人脑和大模型'];
 const S0TITLE_HOLD = .6 + .07 * [...S0TITLE.join('').replace(/\s/g, '')].length;
 // 节拍（秒）
 const S0H = {

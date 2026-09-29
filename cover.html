@@ -56,7 +56,7 @@ function cvDraw(c, L) {
   const hd = L.head, hs = Math.min(hd.size, hd.max / zhWidth(c, hd.lines[0], 100) * 100);
   hd.lines.forEach((ln, i) => zh(c, ln, hd.x, hd.y + i * hd.gap, { size: hs, align: 'center', color: CV_CREAM, outline: CV_CREAM, ow: hs * .04 }));
   zh(c, '「我是最强的」只值 1 比特', L.hook.x, L.hook.y, { size: L.hook.size, align: 'center', color: CV_RED });
-  zh(c, '为什么死记硬背记不住', L.title.x, L.title.y, { size: L.title.size, align: 'center', color: CV_CREAM });
+  zh(c, '用信息论看人脑和大模型', L.title.x, L.title.y, { size: L.title.size, align: 'center', color: CV_CREAM });
   zh(c, '帕秋莉讲座 · 第 3 集', L.series.x, L.series.y, { size: L.series.size, align: 'center', color: CV_CREAM2 });
   drawPatchouli(c, { x: L.pch.x, y: L.pch.y, h: L.pch.h, pose: 'peek', mood: 'normal', facing: -1, look: .8, t: CV_T, blink: 0, mouth: 0 });
 }
