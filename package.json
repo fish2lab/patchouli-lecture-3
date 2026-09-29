@@ -1,8 +1,8 @@
 {
-  "name": "patchouli-lecture-2",
+  "name": "patchouli-lecture-3",
   "private": true,
   "version": "0.1.0",
-  "description": "帕秋莉讲座 第 2 集：从 9 分到 90 分，笨蛋都能懂的学习公式（Canvas 2D 科普动画）",
+  "description": "帕秋莉讲座 第 3 集：「我是最强的」只值 1 比特：用信息论看人脑和大模型（Canvas 2D 剪纸风科普动画）",
   "scripts": {
     "font": "node tools/fetch-font.mjs",
     "frames": "node tools/frames.mjs",

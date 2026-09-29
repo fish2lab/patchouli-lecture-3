@@ -4,3 +4,4 @@ dist/
 fonts/*.ttf
 .claude/
 tools/bits/.venv/
+.DS_Store

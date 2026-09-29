@@ -5,7 +5,7 @@
 name: build & publish
 on:
   push:
-    branches: [main, 'cc/**', 'ep2-**']
+    branches: [main]
     tags: ['v*']
   workflow_dispatch:
 permissions:
@@ -33,7 +33,7 @@ jobs:
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-noto-cjk
           npx playwright install --with-deps chromium
           node tools/render.mjs --jobs 4
-          cp dist/index.html patchouli-lecture-2.html
+          cp dist/index.html patchouli-lecture-3.html
           echo "TAG=v$(node -p 'require("./package.json").version')" >> $GITHUB_ENV
       - name: release (release only)
         if: env.RELEASE == 'true'
@@ -41,12 +41,12 @@ jobs:
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || env.TAG }}
           target_commitish: ${{ github.sha }}
-          name: 帕秋莉讲座 第 2 集 ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || env.TAG }}（POC）
+          name: 帕秋莉讲座 第 3 集 ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || env.TAG }}
           prerelease: true
-          body_path: docs/release-notes.md
+          body_path: docs/发布.md
           files: |
-            patchouli-lecture-2.html
-            out/patchouli-lecture-2.mp4
+            patchouli-lecture-3.html
+            out/patchouli-lecture-3.mp4
       - if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with: { path: dist }
