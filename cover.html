@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>帕秋莉讲座 第 2 集 · 视频封面</title>
+<title>帕秋莉讲座 第 3 集 · 视频封面</title>
 <style>
 @font-face { font-family: WenKai; src: url(fonts/LXGWWenKai-Regular.ttf); font-display: block; }
 html, body { margin: 0; background: #1a1418; }
@@ -11,77 +11,53 @@ canvas { display: block; max-width: 100%; margin: 0 auto; }
 </style>
 </head>
 <body>
-<!-- 第 2 集视频封面。默认 16:9（1920×1080）；?ar=43 出 4:3（1440×1080，单独排版，不是裁切）。导出 PNG：node tools/cover.mjs -->
+<!-- 第 3 集视频封面。默认 16:9（1920×1080）；?ar=43 出 4:3（1440×1080，单独排版，不是裁切）。导出 PNG：node tools/cover.mjs -->
 <canvas id="c"></canvas>
 <script src="src/core.js"></script>
 <script src="src/kit.js"></script>
 <script src="src/character/patchouli.js"></script>
 <script src="src/character/cirno.js"></script>
 <script src="src/props.js"></script>
-<script src="src/net.js"></script>
+<script src="src/tape.js"></script>
+<script src="src/scenes/0-opening.js"></script>
 <script>
 'use strict';
-// 压暗的冰蓝底：左边琪露诺得意地举着 9 分试卷；右边一张网络简图（三根冰纸条连到冰晶，一颗红火花在往回跑）；
-// 大字「大脑一直在预测」，下面一句钩子「预测错的那一下，你才在学」，再是标题和系列名；帕秋莉从右下角探头，ジト目看着琪露诺。
+// 第 3 集封面：深紫夜色底；左边一摞比琪露诺还高的错题卷子，绝大多数已经褪成白纸，只剩几张红叉的亮着（开场最后那个画面）；
+// 琪露诺在卷子旁边得意地握拳。右边大字「能猜到的，就不用记」，下面钩子「「我是最强的」只值 1 比特」，再是副标题和系列名；
+// 帕秋莉从右下角探头。
 const CV_T = 2.4;
-const CV_BG = '#384a58', CV_CREAM = '#ece5d6', CV_CREAM2 = '#b9c3cb';
-// 两种画幅各排一次（坐标都是画布像素）
-// paper.s：试卷按 examPaper 的标准尺寸（440×580）整体缩放，卷面排版不变；title 可以折成几行
-const CV_TITLE = '从 9 分到 90 分：笨蛋都能懂的学习公式';
+const CV_BG = '#2f2833', CV_CREAM = '#ece5d6', CV_CREAM2 = '#b9b0bd', CV_RED = '#e0a39e';
 const CV_LAYOUT = {
-  169: { w: 1920, cir: { x: 430, y: 1110, h: 780 }, paper: { s: .68, rot: -.06 }, frost: [0, 1, 2],
-    net: { x: 1200, y: 290, s: .8 }, head: { x: 1320, y: 650, max: 1060, size: 170 }, hook: { x: 1320, y: 760, size: 64 },
-    title: { x: 1320, y: 855, size: 50, lines: [CV_TITLE] }, series: { x: 1320, y: 930, size: 36 }, pch: { x: 1790, y: 1058, h: 380 } },
-  43: { w: 1440, cir: { x: 300, y: 1120, h: 760 }, paper: { s: .64, rot: -.06 }, frost: [0, 1, 2],
-    net: { x: 900, y: 250, s: .72 }, head: { x: 1000, y: 600, max: 800, size: 140 }, hook: { x: 1000, y: 705, size: 54 },
-    title: { x: 1000, y: 800, size: 46, lines: ['从 9 分到 90 分：', '笨蛋都能懂的学习公式'], gap: 62 }, series: { x: 1000, y: 945, size: 34 }, pch: { x: 1320, y: 1058, h: 340 } },
+  169: { w: 1920, pile: { x: 800, y: 1000, s: 1.4 }, cir: { x: 215, y: 1000, h: 620 },
+    head: { x: 1450, y: 450, max: 820, size: 124, lines: ['能猜到的，', '就不用记'], gap: 150 }, hook: { x: 1450, y: 720, size: 56 },
+    title: { x: 1450, y: 815, size: 48 }, series: { x: 1450, y: 895, size: 34 }, pch: { x: 1800, y: 1058, h: 360 } },
+  43: { w: 1440, pile: { x: 560, y: 1010, s: 1.2 }, cir: { x: 150, y: 1010, h: 520 },
+    head: { x: 1100, y: 420, max: 560, size: 100, lines: ['能猜到的，', '就不用记'], gap: 125 }, hook: { x: 1100, y: 650, size: 42 },
+    title: { x: 1100, y: 735, size: 40 }, series: { x: 1100, y: 810, size: 30 }, pch: { x: 1330, y: 1058, h: 320 } },
 };
 
-function cvBg(c, w, corners) {
+function cvBg(c, w) {
   c.fillStyle = CV_BG; c.fillRect(0, 0, w, H);
   grain(c, polyPath(rectPts(0, 0, w, H)), .1);
-  const v = c.createRadialGradient(w / 2, H / 2, H * .4, w / 2, H / 2, w * .75); v.addColorStop(0, 'rgba(10,16,24,0)'); v.addColorStop(1, 'rgba(10,16,24,.35)');
+  const v = c.createRadialGradient(w * .35, H * .55, H * .2, w / 2, H / 2, w * .8); v.addColorStop(0, 'rgba(255,230,190,.07)'); v.addColorStop(1, 'rgba(8,4,12,.45)');
   c.fillStyle = v; c.fillRect(0, 0, w, H);
-  // 四角的霜花（淡）
-  c.save(); c.globalAlpha *= .28;
-  [[0, 0, .75], [w, 0, 2.4], [0, H, -.75], [w, H, -2.4]].forEach(([x, y, a], k) => { if (corners.includes(k)) ep2Frost(c, x, y, a, 260, 1, 3900 + k); });
-  c.restore();
-}
-
-// 网络简图：netDraw 的三根线 + 冰晶，不出牌；一颗红火花停在上面那根线的半路（刚从冰晶跑出来）
-function cvNet(c, L) {
-  const { x, y, s } = L.net;
-  c.save(); c.translate(x, y); c.scale(s, s); c.translate(-(NET.node.x - 190), -NET.node.y);
-  const saved = NET.col.strip; NET.col.strip = mix(EP2_ICE_DEEP, EP2_ICE, .35);
-  netDraw(c, { lines: [{ kind: 'eye', w: .7, label: '' }, { kind: 'ear', w: .3, label: '' }, { kind: 'page', w: .55, label: '' }], node: {}, pred: null, real: null }, CV_T);
-  NET.col.strip = saved;
-  // 火花：放射的红笔线 + 红星剪纸
-  const [sx, sy] = netAt(0, .5);
-  for (let k = 0; k < 7; k++) { const an = k / 7 * TAU - .3, r0 = 40, r1 = 70;
-    rline(c, [[sx + Math.cos(an) * r0, sy + Math.sin(an) * r0], [sx + Math.cos(an) * r1, sy + Math.sin(an) * r1]], { w: 6, color: P.red, seed: 3900 + k }); }
-  netSparkPiece(c, sx, sy, 38, .3, 1, 3909);
-  c.restore();
 }
 
 function cvDraw(c, L) {
   const w = L.w;
-  cvBg(c, w, L.frost);
-  // 网络
-  cvNet(c, L);
-  // 琪露诺举试卷：试卷在她身后（先画），两只手捏住试卷下沿，蝴蝶结压在试卷前面
-  const cp = { x: L.cir.x, y: L.cir.y, h: L.cir.h, pose: 'hold', mood: 'proud', facing: 1, t: CV_T, blink: 0, mouth: 0, gesture: .6 };
-  const an = drawCirno(document.createElement('canvas').getContext('2d'), cp), hy = (an.hands[0][1] + an.hands[1][1]) / 2, pp = L.paper;
-  c.save(); c.translate(an.hold[0], hy + 30 - EP2.exam.h * pp.s / 2); c.scale(pp.s, pp.s);
-  examPaper(c, { x: 0, y: 0, rot: pp.rot, score: 9, frost: .3 });
+  cvBg(c, w);
+  // 一摞卷子（开场的 s0Pile，按封面放大）：大多褪白，四张亮着
+  const pl = L.pile;
+  c.save(); c.translate(pl.x, pl.y); c.scale(pl.s, pl.s); c.translate(-S0PILE.x, -S0PILE.y);
+  s0Pile(c, { sway: 10, white: .9, glow: 1 });
   c.restore();
-  drawCirno(c, cp);
+  drawCirno(c, { x: L.cir.x, y: L.cir.y, h: L.cir.h, pose: 'proud', mood: 'proud', facing: 1, t: CV_T, blink: 0, mouth: 0, gesture: .8 });
   // 字
-  const hd = L.head, hs = Math.min(hd.size, hd.max / zhWidth(c, '大脑一直在预测', 100) * 100);
-  zh(c, '大脑一直在预测', hd.x, hd.y, { size: hs, align: 'center', color: CV_CREAM, outline: CV_CREAM, ow: hs * .045 });
-  zh(c, '预测错的那一下，你才在学', L.hook.x, L.hook.y, { size: L.hook.size, align: 'center', color: '#e0a39e' });
-  L.title.lines.forEach((ln, i) => zh(c, ln, L.title.x, L.title.y + i * (L.title.gap || 0), { size: L.title.size, align: 'center', color: CV_CREAM }));
-  zh(c, '帕秋莉讲座 · 第 2 集', L.series.x, L.series.y, { size: L.series.size, align: 'center', color: CV_CREAM2 });
-  // 帕秋莉从右下角探头
+  const hd = L.head, hs = Math.min(hd.size, hd.max / zhWidth(c, hd.lines[0], 100) * 100);
+  hd.lines.forEach((ln, i) => zh(c, ln, hd.x, hd.y + i * hd.gap, { size: hs, align: 'center', color: CV_CREAM, outline: CV_CREAM, ow: hs * .04 }));
+  zh(c, '「我是最强的」只值 1 比特', L.hook.x, L.hook.y, { size: L.hook.size, align: 'center', color: CV_RED });
+  zh(c, '为什么死记硬背记不住', L.title.x, L.title.y, { size: L.title.size, align: 'center', color: CV_CREAM });
+  zh(c, '帕秋莉讲座 · 第 3 集', L.series.x, L.series.y, { size: L.series.size, align: 'center', color: CV_CREAM2 });
   drawPatchouli(c, { x: L.pch.x, y: L.pch.y, h: L.pch.h, pose: 'peek', mood: 'normal', facing: -1, look: .8, t: CV_T, blink: 0, mouth: 0 });
 }
 

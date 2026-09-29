@@ -1,4 +1,4 @@
-// 导出第 2 集视频封面：cover.html → out/cover/cover-16x9.png（1920×1080）、cover-4x3.png（1440×1080，?ar=43 单独排版）
+// 导出第 3 集视频封面：cover.html → out/cover/cover-16x9.png（1920×1080）、cover-4x3.png（1440×1080，?ar=43 单独排版）
 //   node tools/cover.mjs
 // 页面有报错时退出码 1。浏览器同 browser.mjs（CHROMIUM=可执行文件路径，不设用 Playwright 自带的）。
 import { chromium } from 'playwright';
