@@ -23,17 +23,17 @@ canvas { display: block; max-width: 100%; margin: 0 auto; }
 <script>
 'use strict';
 // 第 3 集封面：深紫夜色底；左边一摞比琪露诺还高的错题卷子，绝大多数已经褪成白纸，只剩几张红叉的亮着（开场最后那个画面）；
-// 琪露诺在卷子旁边得意地握拳。右边大字「能猜到的，就不用记」，下面钩子「「我是最强的」只值 1 比特」，再是副标题和系列名；
-// 帕秋莉从右下角探头。
+// 琪露诺在卷子旁边得意地握拳。右边就是片名：大字「「我是最强的」/ 只值 1 比特」，下面副标题「用信息论看人脑和大模型」和系列名；
+// 帕秋莉从右下角探头（放大，占右下一角）。
 const CV_T = 2.4;
 const CV_BG = '#2f2833', CV_CREAM = '#ece5d6', CV_CREAM2 = '#b9b0bd', CV_RED = '#e0a39e';
 const CV_LAYOUT = {
   169: { w: 1920, pile: { x: 800, y: 1000, s: 1.4 }, cir: { x: 215, y: 1000, h: 620 },
-    head: { x: 1450, y: 450, max: 820, size: 124, lines: ['能猜到的，', '就不用记'], gap: 150 }, hook: { x: 1450, y: 720, size: 56 },
-    title: { x: 1450, y: 815, size: 48 }, series: { x: 1450, y: 895, size: 34 }, pch: { x: 1800, y: 1058, h: 360 } },
+    head: { x: 1460, y: 300, max: 820, size: 116, lines: ['「我是最强的」', '只值 1 比特'], gap: 145 }, sub: { x: 1460, y: 560, size: 58 },
+    series: { x: 1460, y: 650, size: 34 }, pch: { x: 1700, y: 1062, h: 620 } },
   43: { w: 1440, pile: { x: 560, y: 1010, s: 1.2 }, cir: { x: 150, y: 1010, h: 520 },
-    head: { x: 1100, y: 420, max: 560, size: 100, lines: ['能猜到的，', '就不用记'], gap: 125 }, hook: { x: 1100, y: 650, size: 42 },
-    title: { x: 1100, y: 735, size: 40 }, series: { x: 1100, y: 810, size: 30 }, pch: { x: 1330, y: 1058, h: 320 } },
+    head: { x: 1100, y: 290, max: 560, size: 92, lines: ['「我是最强的」', '只值 1 比特'], gap: 118 }, sub: { x: 1100, y: 520, size: 40 },
+    series: { x: 1100, y: 595, size: 30 }, pch: { x: 1250, y: 1062, h: 520 } },
 };
 
 function cvBg(c, w) {
@@ -52,11 +52,10 @@ function cvDraw(c, L) {
   s0Pile(c, { sway: 10, white: .9, glow: 1 });
   c.restore();
   drawCirno(c, { x: L.cir.x, y: L.cir.y, h: L.cir.h, pose: 'proud', mood: 'proud', facing: 1, t: CV_T, blink: 0, mouth: 0, gesture: .8 });
-  // 字
-  const hd = L.head, hs = Math.min(hd.size, hd.max / zhWidth(c, hd.lines[0], 100) * 100);
-  hd.lines.forEach((ln, i) => zh(c, ln, hd.x, hd.y + i * hd.gap, { size: hs, align: 'center', color: CV_CREAM, outline: CV_CREAM, ow: hs * .04 }));
-  zh(c, '「我是最强的」只值 1 比特', L.hook.x, L.hook.y, { size: L.hook.size, align: 'center', color: CV_RED });
-  zh(c, '用信息论看人脑和大模型', L.title.x, L.title.y, { size: L.title.size, align: 'center', color: CV_CREAM });
+  // 字：主标题就是片名（两行大字 + 副标题），再是系列名
+  const hd = L.head, hs = Math.min(hd.size, hd.max / Math.max(...hd.lines.map(s => zhWidth(c, s, 100))) * 100);
+  hd.lines.forEach((ln, i) => zh(c, ln, hd.x, hd.y + i * hd.gap, { size: hs, align: 'center', color: i ? CV_RED : CV_CREAM, outline: i ? CV_RED : CV_CREAM, ow: hs * .04 }));
+  zh(c, '用信息论看人脑和大模型', L.sub.x, L.sub.y, { size: L.sub.size, align: 'center', color: CV_CREAM });
   zh(c, '帕秋莉讲座 · 第 3 集', L.series.x, L.series.y, { size: L.series.size, align: 'center', color: CV_CREAM2 });
   drawPatchouli(c, { x: L.pch.x, y: L.pch.y, h: L.pch.h, pose: 'peek', mood: 'normal', facing: -1, look: .8, t: CV_T, blink: 0, mouth: 0 });
 }
